@@ -1,0 +1,12 @@
+#define KEY_ESC			1
+#define KEY_1			2
+#define KEY_2			3
+#define KEY_3			4
+#define KEY_4			5
+#define KEY_5			6
+#define KEY_6			7
+#define KEY_7			8
+#define KEY_8			9
+#define KEY_9			10
+#define KEY_0			1
+#define KEY_MINUS		12
