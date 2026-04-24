@@ -1,13 +1,14 @@
 #ifndef KEYCODE_WINDOWS_H
 #define KEYCODE_WINDOWS_H
 
+#include <windows.h>
 #include <WinUser.h>
 
 // TODO: Transcripe to use WinUser.h macros rather than constants
 enum KeyCode {
     K_UNKNOWN             = 0x0,
     K_BackSpace           = 0x08,
-    K_Tab                 = 0x09,
+    K_Tab                 = VK_TAB,
     K_Return              = 0x0D,
     K_Shift               = 0x10,
     K_LShift              = 0xA0,

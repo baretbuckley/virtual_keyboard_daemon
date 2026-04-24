@@ -10,7 +10,7 @@
 
 
 typedef struct {
-    INPUT sendBuffer[20];
+    INPUT sendBuffer[100];
 } KeyBoard;
 
 enum Result {
@@ -60,10 +60,9 @@ enum Result releaseKey(KeyBoard *keyboard, enum KeyCode key) {
     return Success;
 }
 
-#define DEFAULT_TAP_DELAY 30
-
 // void tapKey(KeyBoard *keyboard, enum KeyCode key, int delay_ms);
 enum Result tapKey(KeyBoard *keyboard, enum KeyCode key) {
+    printf("Sending key %s\n", keycodeAsString(key));
     INPUT *inputs = (keyboard->sendBuffer);
     ZeroMemory(inputs, sizeof(INPUT)*2);
     inputs[0].type = INPUT_KEYBOARD;
@@ -71,7 +70,7 @@ enum Result tapKey(KeyBoard *keyboard, enum KeyCode key) {
     inputs[1].type = INPUT_KEYBOARD;
     inputs[1].ki.wVk = key;
     inputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
-    UINT uSent = SendInput(ARRAYSIZE(inputs), inputs, sizeof(INPUT));
+    UINT uSent = SendInput(2, inputs, sizeof(INPUT));
     if (uSent != 2) {
         printf("SendInput failed: 0x%x\n", HRESULT_FROM_WIN32(GetLastError()));
     }
@@ -83,7 +82,6 @@ enum Result sendEvent(KeyBoard *keyboard);
 enum Result sendEvents(KeyBoard *keyboard, struct Event *events, int len);
 
 enum Result drainBuffer(KeyBoard *keyboard, int len) {
-    printf("Draining %i\n", len);
     UINT uSent = SendInput(len, keyboard->sendBuffer, sizeof(INPUT));
     if (uSent != len) {
         printf("SendInput failed: 0x%x\n", HRESULT_FROM_WIN32(GetLastError()));
@@ -124,8 +122,6 @@ enum Result typeString(KeyBoard *keyboard, const char* str) {
     for (int i = 0; str[i]; i++) {
 
         enum KeyCode key = charToKeyCode(str[i], &requiredShift);
-        printf("Sending keycode %s\n", keycodeAsString(key));
-
         if (requiredShift != shift) {
             if (requiredShift)
                 pos = addInputPress(keyboard, pos, K_Shift);

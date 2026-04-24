@@ -1,8 +1,4 @@
-#ifndef KEYCODE_H
-#define KEYCODE_H
-
-#include "keycode_windows.h"
-
+#include <keycode.h>
 
 const char* keycodeAsString(enum KeyCode code) {
     switch (code) {
@@ -133,6 +129,7 @@ const char* keycodeAsString(enum KeyCode code) {
     }
 }
 
+
 enum KeyCode charToKeyCode(char c, int *shifted) {
     
     int shift = 0;
@@ -186,5 +183,3 @@ enum KeyCode charToKeyCode(char c, int *shifted) {
         *shifted = shift;
     return code; 
 }
-
-#endif
