@@ -190,6 +190,9 @@ class EnumInfo:
                     return self.read_enum(line, file)
                 line = file.readline()
 
+    def cut_commented(self):
+        self.tokens = list(filter(lambda a: a != '//', self.tokens))
+
     def cut_prefix(self, prefix: str):
         for i in range(0, len(self.tokens)):
             if prefix != self.tokens[i][0:len(prefix)]:
@@ -198,6 +201,7 @@ class EnumInfo:
 
     
 enum = EnumInfo(ENUM_FILE)
+enum.cut_commented()
 enum.cut_prefix(VALUES_SKIP_PREFIX)
 trie = Node(0, enum.tokens)
 

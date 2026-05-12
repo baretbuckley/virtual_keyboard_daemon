@@ -95,12 +95,6 @@ enum KeyCode keycodeFromString(const char *keyName) {
         }
       default: return K_UNKNOWN;
       }
-    case 'M':
-      if (!strcmp(&keyName[2], "enu")) {
-        return K_RMenu;
-      } else {
-        return K_UNKNOWN;
-      }
     case 'i':
       switch (keyName[2]) {
       case 'g':
@@ -197,12 +191,6 @@ enum KeyCode keycodeFromString(const char *keyName) {
           return K_UNKNOWN;
         }
       default: return K_UNKNOWN;
-      }
-    case 'M':
-      if (!strcmp(&keyName[2], "enu")) {
-        return K_LMenu;
-      } else {
-        return K_UNKNOWN;
       }
     case 'e':
       switch (keyName[2]) {

@@ -1,0 +1,133 @@
+#ifndef KEYCODE_WINDOWS_H
+#define KEYCODE_WINDOWS_H
+
+#include <linux/input-event-codes.h>
+
+// TODO: Transcripe to use WinUser.h macros rather than copying the constants
+enum KeyCode {
+    K_UNKNOWN             = 0x0, // *DEFAULT* (flag used in auto file gen to signal default/unknown keycode)
+    K_BackSpace           = KEY_BACKSPACE,
+    K_Tab                 = KEY_TAB,
+    K_Return              = KEY_ENTER,
+    K_Shift               = KEY_LEFTSHIFT,
+    K_LShift              = KEY_LEFTSHIFT,
+    K_RShift              = KEY_RIGHTSHIFT,
+    K_Control             = KEY_LEFTCTRL,
+    K_ControlLeft         = KEY_LEFTCTRL,
+    K_ControlRight        = KEY_RIGHTCTRL,
+    K_Menu                = KEY_MENU,
+    K_Capital             = KEY_CAPSLOCK,
+    K_Escape              = KEY_ESC,
+    K_Space               = KEY_SPACE,
+    K_PageUp              = KEY_PAGEUP,
+    K_PageDown            = KEY_PAGEDOWN,
+    K_End                 = KEY_END,
+    K_Home                = KEY_HOME,
+    K_Left                = KEY_LEFT,
+    K_Up                  = KEY_UP,
+    K_Right               = KEY_RIGHT,
+    K_Down                = KEY_DOWN,
+    K_Select              = KEY_SELECT,
+    K_Print               = KEY_PRINT,
+    K_Execute             = 0, // TODO: find replacement and if not do we need this key
+    K_Snapshot            = KEY_PRINT,
+    K_Insert              = KEY_INSERT,
+    K_Delete              = KEY_DELETE,
+    K_Help                = KEY_HELP,
+    K_0                   = KEY_0,
+    K_1                   = KEY_1,
+    K_2                   = KEY_2,
+    K_3                   = KEY_3,
+    K_4                   = KEY_4,
+    K_5                   = KEY_5,
+    K_6                   = KEY_6,
+    K_7                   = KEY_7,
+    K_8                   = KEY_8,
+    K_9                   = KEY_9,
+    K_A                   = KEY_A,
+    K_B                   = KEY_B,
+    K_C                   = KEY_C,
+    K_D                   = KEY_D,
+    K_E                   = KEY_E,
+    K_F                   = KEY_F,
+    K_G                   = KEY_G,
+    K_H                   = KEY_H,
+    K_I                   = KEY_I,
+    K_J                   = KEY_J,
+    K_K                   = KEY_K,
+    K_L                   = KEY_L,
+    K_M                   = KEY_M,
+    K_N                   = KEY_N,
+    K_O                   = KEY_O,
+    K_P                   = KEY_P,
+    K_Q                   = KEY_Q,
+    K_R                   = KEY_R,
+    K_S                   = KEY_S,
+    K_T                   = KEY_T,
+    K_U                   = KEY_U,
+    K_V                   = KEY_V,
+    K_W                   = KEY_W,
+    K_X                   = KEY_X,
+    K_Y                   = KEY_Y,
+    K_Z                   = KEY_Z,
+    K_LeftWindows         = KEY_LEFTMETA,
+    K_RightWindows        = KEY_RIGHTMETA,
+    K_Apps                = KEY_APPSELECT, // TODO: Confirm
+    K_Sleep               = KEY_SLEEP,
+    K_Numpad0             = KEY_NUMERIC_0,
+    K_Numpad1             = KEY_NUMERIC_1,
+    K_Numpad2             = KEY_NUMERIC_2,
+    K_Numpad3             = KEY_NUMERIC_3,
+    K_Numpad4             = KEY_NUMERIC_4,
+    K_Numpad5             = KEY_NUMERIC_5,
+    K_Numpad6             = KEY_NUMERIC_6,
+    K_Numpad7             = KEY_NUMERIC_7,
+    K_Numpad8             = KEY_NUMERIC_8,
+    K_Numpad9             = KEY_NUMERIC_9,
+    K_Multiply            = KEY_NUMERIC_STAR,
+    K_Add                 = 0, // TODO Figure out whats happening with these keys
+    K_Subtract            = 0,
+    K_Decimal             = 0,
+    K_Divide              = 0,
+    K_F1                  = KEY_F1,
+    K_F2                  = KEY_F2,
+    K_F3                  = KEY_F3,
+    K_F4                  = KEY_F4,
+    K_F5                  = KEY_F5,
+    K_F6                  = KEY_F6,
+    K_F7                  = KEY_F7,
+    K_F8                  = KEY_F8,
+    K_F9                  = KEY_F9,
+    K_F10                 = KEY_F10,
+    K_F11                 = KEY_F11,
+    K_F12                 = KEY_F12,
+    K_F13                 = KEY_F13,
+    K_F14                 = KEY_F14,
+    K_F15                 = KEY_F15,
+    K_F16                 = KEY_F16,
+    K_F17                 = KEY_F17,
+    K_F18                 = KEY_F18,
+    K_F19                 = KEY_F19,
+    K_F20                 = KEY_F20,
+    K_F21                 = KEY_F21,
+    K_F22                 = KEY_F22,
+    K_F23                 = KEY_F23,
+    K_F24                 = KEY_F24,
+    K_Numlock             = KEY_NUMLOCK,
+    K_Scroll              = 0, // TODO: IDK what the key is supposed to be doing
+    K_Equal               = KEY_EQUAL,   // '=' key on numpad
+    K_Colon_Semicolon     = KEY_SEMICOLON,   // ';:' for US
+    K_Plus_Equal          = KEY_EQUAL,   // '+' any country
+    K_Comma_LAngleBracket             = KEY_COMMA,   // ',' any country
+    K_Minus_Underscore                = KEY_MINUS,   // '-' any country
+    K_Period_RAngleBracket            = KEY_DOT,   // '.' any country
+    K_ForwardSlash_QuestionMark       = KEY_SLASH,   // '/?' for US
+    K_Grave_Tilde                     = KEY_GRAVE,   // '`~' for US
+    K_LSquareBracket_LCurlyBracket    = KEY_LEFTBRACE,  //  '[{' for US
+    K_Backslash_Pipe                  = KEY_BACKSLASH,  //  '\|' for US
+    K_RSquareBracket_RCurlyBracket    = KEY_RIGHTBRACE,  //  ']}' for US
+    K_SingleQuote_DoubleQuote         = KEY_APOSTROPHE,  //  ''"' for US
+};
+
+#endif // KEYCODE_WINDOWS_H
+

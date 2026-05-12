@@ -1,7 +1,11 @@
 #ifndef KEYCODE_H
 #define KEYCODE_H
 
+#if defined(_WIN32) || defined(_WIN64)
 #include "windows/keycode_windows.h"
+#elif defined(__linux__)
+#include "linux/keycode_linux.h"
+#endif
 
 
 const char* keycodeAsString(enum KeyCode code);
