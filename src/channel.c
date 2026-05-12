@@ -3,11 +3,14 @@
 #include <windows.h>
 #include <stdio.h>
 
+
+#define CHANNEL_BUFFER_SIZE 2048
+
 struct ServerChannel {
-    char *pipePath;
     struct SerialMessage msgBuffer;
     HANDLE pipe;
     BOOL connected;
+    char pipePath[256];
 };
 
 struct ClientChannel {
@@ -23,8 +26,8 @@ int reopenChannel(struct ServerChannel *channel) {
         PIPE_ACCESS_INBOUND,
         PIPE_TYPE_MESSAGE | PIPE_WAIT,
         PIPE_UNLIMITED_INSTANCES,
-        2048,
-        2048,
+        CHANNEL_BUFFER_SIZE,
+        CHANNEL_BUFFER_SIZE,
         0,
         NULL
     );
@@ -37,34 +40,15 @@ int reopenChannel(struct ServerChannel *channel) {
 struct ServerChannel *createChannel(const char *name) {
     struct ServerChannel *server = malloc(sizeof(struct ServerChannel));
 
-    server->msgBuffer = initSerialMsgCapacity(1024);
+    server->msgBuffer = initSerialMsgCapacity(CHANNEL_BUFFER_SIZE);
 
-    char *pipePath = malloc(256);
-    sprintf(pipePath, "\\\\.\\pipe\\%s", name);
-    server->pipePath = pipePath;
+    sprintf(&server->pipePath, "\\\\.\\pipe\\%s", name);
 
     if (reopenChannel(server) == -1) {
         return NULL;
     } else {
         return server;
     }
-
-    // server->connected = FALSE;
-    // server->pipe = CreateNamedPipe(
-    //     pipePath,
-    //     PIPE_ACCESS_INBOUND,
-    //     PIPE_TYPE_MESSAGE | PIPE_WAIT,
-    //     PIPE_UNLIMITED_INSTANCES,
-    //     2048,
-    //     2048,
-    //     0,
-    //     NULL
-    // );
-    // if (server->pipe == INVALID_HANDLE_VALUE) {
-    //     printf("Failed to created pipe");
-    //     return -1;
-    // }
-    // return server;
 }
 
 int waitConnection(struct ServerChannel *channel) {

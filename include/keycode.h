@@ -8,4 +8,6 @@ const char* keycodeAsString(enum KeyCode code);
 
 enum KeyCode charToKeyCode(char c, int *shifted);
 
+enum KeyCode keycodeFromString(const char *keyName);
+
 #endif

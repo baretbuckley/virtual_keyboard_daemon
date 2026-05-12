@@ -4,9 +4,9 @@
 #include <windows.h>
 #include <WinUser.h>
 
-// TODO: Transcripe to use WinUser.h macros rather than constants
+// TODO: Transcripe to use WinUser.h macros rather than copying the constants
 enum KeyCode {
-    K_UNKNOWN             = 0x0,
+    K_UNKNOWN             = 0x0, // *DEFAULT* (flag used in auto file gen to signal default/unknown keycode)
     K_BackSpace           = 0x08,
     K_Tab                 = VK_TAB,
     K_Return              = 0x0D,

@@ -1,0 +1,17 @@
+
+VKey flags:
+    --channel-name      - Name of the channel for communicating with the server
+
+
+commands:
+    type:               - given string types input needed
+        --key-delay <ms>    - delay time between key presses 
+    press               - press given key, allows multiple seperated with 'A'
+        --hold              - holds key without releasing
+        --hold-for <ms>     - Presses key and holds for specified amount of time
+        <key>               - key to press       
+    release <keycode> 
+    delay <ms>          - delay execution of all following commands for specified time
+    repeat <count> <cmd>             - repeate next command n times
+    close_server        - Close the target server
+    

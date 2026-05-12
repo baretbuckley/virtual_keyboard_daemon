@@ -22,7 +22,6 @@ struct SerialExtractor {
     unsigned int pos;
 };
 
-
 struct Message {
     enum MessageType type;
     union {
@@ -65,17 +64,23 @@ unsigned int serialFullLen(struct SerialMessage smsg);
 
 
 // Appends server close signal to the serial message
-void serialMsgAppendServerClose(struct SerialMessage *smsg);
+// Returns -1 if buffer is out of space
+int serialMsgAppendServerClose(struct SerialMessage *smsg);
+
+// Appends server close signal to the serial message
+// Dynamically grows internal buffer as need
+void dynamicSerialMsgAppendServerClose(struct SerialMessage *smsg);
+
 
 // Appends string to the serial message
 // serial object does not take ownership of string and copys it to internal buffer
-void serialMsgAppendString(struct SerialMessage *smsg, const char* str);
+int serialMsgAppendString(struct SerialMessage *smsg, const char* str);
 
 // Appends key message to the serial message
-void serialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key);
+int serialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key);
 
 // Appends given message to the serial message object
-void serialMsgAppend(struct SerialMessage *smsg, struct Message other);
+int serialMsgAppend(struct SerialMessage *smsg, struct Message other);
 
 // Appends serial messages. copies others internal buffer to smsg
 void serialMsgAppendSerial(struct SerialMessage *smsg, struct SerialMessage other);

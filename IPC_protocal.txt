@@ -1,0 +1,28 @@
+
+
+Formats for Message packets
+(Command)* <MSG END | MSG PAUSE>
+<MSG PICKUP> (Command)* <MSG END | MSG PAUSE>
+
+
+Message terminals must be negative i32
+    MSG END     -1
+    MSG PAUSE   -2
+    MSG PICKUP  -3
+
+Each Command consists of positive i32 header followed by 0 or more arguments
+Commands:
+Type <u8 string>                            - type given string
+TypeDelayed <u32 delay> <u8 string>         - Type with a specified delay between keystrokes 
+Press <u32 keycode> -                       - press keycode
+PressFor <u32 delay> <u32 keycode>          - Press keycode for delay ms then release
+hold <u32 keycode>                          - Hold keycode without releasing
+Release <u32 keycode>                       - Release specified keycode
+delay <u32 delay>                           - Delay execution for delay ms the continue
+repeat <u32 count> <u32 delay> <Command>    - Repeat command count times with a given delay
+ServerClose                                 - Request connected server to close 
+
+Additionally a special case is made to the Type and TypeDelayed Commands
+The commands may be split into multiple commands
+this is done to ensure the command can be small enough to send through channel.
+i.e. Type "a string thats too long" -> Type "a string th" Type "ats too long"

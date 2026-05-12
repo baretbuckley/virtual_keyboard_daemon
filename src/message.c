@@ -103,26 +103,35 @@ unsigned int serialFullLen(struct SerialMessage smsg) {
     return smsg.msgLen += 4;
 }
 
-void serialMsgAppendServerClose(struct SerialMessage *smsg) {
-    // Ensure cap is can fit string (with null term byte) + serial null terminator
-    const unsigned int msgSize = 4+4;
-    if (smsg->capacity - smsg->msgLen < msgSize) {
-        expandCompoundMsg(smsg, smsg->msgLen + msgSize);
-    }
+
+void serialMsgAppendServerCloseWorker(struct SerialMessage *smsg) {
     uint32_t msgCode = M_ServerClose;
     memcpy(smsg->msgBuffer+smsg->msgLen, &msgCode, 4);
     smsg->msgLen += 4;
     addNullTerminator(smsg);
 }
 
-void serialMsgAppendString(struct SerialMessage *smsg, const char* str) {
-    int strLen = strlen(str);
+int serialMsgAppendServerClose(struct SerialMessage *smsg) {
     // Ensure cap is can fit string (with null term byte) + serial null terminator
-    const unsigned int msgSize = 5+strLen + 4;
+    const unsigned int msgSize = 4+4;
+    if (smsg->capacity - smsg->msgLen < msgSize) {
+        return -1;
+    }
+    serialMsgAppendServerCloseWorker(smsg);
+    return 0;
+}
+
+void dynamicSerialMsgAppendServerClose(struct SerialMessage *smsg) {
+    // Ensure cap is can fit string (with null term byte) + serial null terminator
+    const unsigned int msgSize = 4+4;
     if (smsg->capacity - smsg->msgLen < msgSize) {
         expandCompoundMsg(smsg, smsg->msgLen + msgSize);
     }
-    
+    serialMsgAppendServerCloseWorker(smsg);
+}
+
+
+void serialMsgAppendStringWorker(struct SerialMessage *smsg, const char* str, int strLen) {
     uint32_t msgCode = M_String;
     memcpy(smsg->msgBuffer+smsg->msgLen, &msgCode, 4);
     smsg->msgLen += 4;
@@ -131,12 +140,29 @@ void serialMsgAppendString(struct SerialMessage *smsg, const char* str) {
     addNullTerminator(smsg);
 }
 
-void serialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key) {
-    // Ensure cap is can fit press key signa and keycode + serial null terminator
-    const unsigned int msgSize = 8+4;
+int serialMsgAppendString(struct SerialMessage *smsg, const char* str) {
+    int strLen = strlen(str);
+    // Ensure cap is can fit string (with null term byte) + serial null terminator
+    const unsigned int msgSize = 5+strLen + 4;
+    if (smsg->capacity - smsg->msgLen < msgSize) {
+        return -1;
+    }
+    serialMsgAppendStringWorker(smsg, str, strLen);
+    return 0;
+}
+
+void dynamicSerialMsgAppendString(struct SerialMessage *smsg, const char* str) {
+    int strLen = strlen(str);
+    // Ensure cap is can fit string (with null term byte) + serial null terminator
+    const unsigned int msgSize = 5+strLen + 4;
     if (smsg->capacity - smsg->msgLen < msgSize) {
         expandCompoundMsg(smsg, smsg->msgLen + msgSize);
     }
+    serialMsgAppendStringWorker(smsg, str, strLen);
+}
+
+
+void serialMsgAppendKeyWorker(struct SerialMessage *smsg, enum KeyCode key) {
     uint32_t msgCode = M_Key;
     memcpy(smsg->msgBuffer+smsg->msgLen, &msgCode, 4);
     smsg->msgLen += 4;
@@ -146,6 +172,27 @@ void serialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key) {
     smsg->msgLen += 4;
     addNullTerminator(smsg);
 }
+
+int serialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key) {
+    // Ensure cap is can fit press key signa and keycode + serial null terminator
+    const unsigned int msgSize = 8+4;
+    if (smsg->capacity - smsg->msgLen < msgSize) {
+        return -1;
+    }
+    serialMsgAppendKeyWorker(smsg, key);
+    return 0;
+}
+
+void dynamicSerialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key) {
+    // Ensure cap is can fit press key signa and keycode + serial null terminator
+    const unsigned int msgSize = 8+4;
+    if (smsg->capacity - smsg->msgLen < msgSize) {
+        expandCompoundMsg(smsg, smsg->msgLen + msgSize);
+    }
+    serialMsgAppendKeyWorker(smsg, key);
+}
+
+
 
 void serialMsgAppend(struct SerialMessage *smsg, struct Message other) {
     switch (other.type) {
