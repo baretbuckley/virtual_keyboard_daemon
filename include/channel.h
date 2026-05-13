@@ -6,9 +6,12 @@
 struct ClientChannel;
 struct ServerChannel;
 
+// Defined here for shared access between backends
+#define CHANNEL_BUFFER_SIZE 2048
+
+
+
 // Server Side API
-
-
 
 struct ServerChannel *createChannel(const char *name);
 
@@ -23,6 +26,8 @@ int isClientConnected(struct ServerChannel *channel);
 void freeServerChannel(struct ServerChannel *channel);
 
 
+
+// Client Side API
 
 struct ClientChannel *openChannel(const char *name);
 

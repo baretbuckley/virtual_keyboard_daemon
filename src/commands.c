@@ -1,7 +1,9 @@
 #include <commands.h>
 
 #include <stdio.h>
-
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 // Comand usages ------------------------------------------
 
@@ -364,6 +366,9 @@ enum CommandType parse_command(const char** input, union CmdContext* context, in
         else
             reportParseError(res, input, *read);
         return CMD_UNKNOWN;
+    } else if (strcmp(input[0], "server-close") == 0) {
+        *read = 1;
+        return CMD_CLOSE_SERVER;
 
     
 

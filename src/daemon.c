@@ -13,16 +13,13 @@
 // #pragma comment(lib, "Ws2_32.lib")
 
 int main() {
-
-    #define BUFFER_SIZE 256
-    // char buffer[BUFFER_SIZE] = {0};
     // int bytesRead;
     struct SerialMessage *msgRef;
 
     struct KeyBoard *keyboard = createKeyBoard();
 
     // Create channel
-    struct ServerChannel *channel = createChannel("vkeyd");
+    struct ServerChannel *channel = createChannel("vkeyd5");
 
 
     if (!channel) {
@@ -34,6 +31,7 @@ int main() {
     while (1) {
 
         // Wait untill client connects 
+        printf("Connecting\n");
         if (waitConnection(channel)) {
             printf("Failed to connect to client\n");
             freeServerChannel(channel);
@@ -44,7 +42,9 @@ int main() {
         // While client is connects keep reading from the channel
         // If recieved "exit" shut down server
         while (isClientConnected(channel)) {
+            printf("Recieving message\n");
             msgRef = recieveMessage(channel);
+            printf("reading message\n");
             // bytesRead = recieveMessage(channel, buffer, BUFFER_SIZE);
             
             if (msgRef == NULL) {

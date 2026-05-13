@@ -1,6 +1,6 @@
-#include <wtypes.h> // Needed by winuser
-#include <winuser.h>
-#include <winerror.h>
+// #include <wtypes.h> // Needed by winuser
+// #include <winuser.h>
+// #include <winerror.h>
 #include <stdio.h>
 
 #include "virtual_keyboard.h"

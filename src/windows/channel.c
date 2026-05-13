@@ -4,8 +4,6 @@
 #include <stdio.h>
 
 
-#define CHANNEL_BUFFER_SIZE 2048
-
 struct ServerChannel {
     struct SerialMessage msgBuffer;
     HANDLE pipe;
@@ -84,6 +82,7 @@ struct SerialMessage *recieveMessage(struct ServerChannel *channel) {
             return &(channel->msgBuffer);
         } else {
             printf("Failed to read from pipe. Error code %li\n", GetLastError());
+            closeChannel(channel);
             return NULL;
         }
     }
@@ -98,9 +97,10 @@ int isClientConnected(struct ServerChannel *channel) {
 }
 
 void freeServerChannel(struct ServerChannel *channel) {
-    free(channel->pipePath);
     deinitSerialMsg(&(channel->msgBuffer));
+    free(channel);
 }
+
 
 
 
@@ -147,11 +147,11 @@ int sendMessage(struct ClientChannel *channel, struct SerialMessage msg) {
         return -1;
     }
     return written;
-    return 1;
 }
 
 void freeClientChannel(struct ClientChannel *channel) {
     if (channel->connected)
         disconnect(channel);
     free(channel->pipePath);
+    free(channel);
 }

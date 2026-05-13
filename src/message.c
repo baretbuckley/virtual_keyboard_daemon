@@ -2,7 +2,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <keycode.h>
-
+#include <stdlib.h>
+#include <string.h>
 
 void printMessage(struct Message *msg) {
     switch (msg->type) {
@@ -36,7 +37,10 @@ void printSerialMsg(struct SerialMessage smsg) {
 }
 
 
-void expandCompoundMsg(struct SerialMessage *smsg, unsigned int needed) {
+void expandSerialMsg(struct SerialMessage *smsg, unsigned int needed) {
+    if (smsg->capacity == 0){
+        needed += 4;
+    }
     unsigned int newCap = (smsg->capacity < 32)? 32 : smsg->capacity;
     while (newCap < needed) {newCap *= 2;}
     
@@ -44,12 +48,12 @@ void expandCompoundMsg(struct SerialMessage *smsg, unsigned int needed) {
     smsg->capacity = newCap;
 }
 
-void addNullTerminator(struct SerialMessage *smsg) {
-    if (smsg->capacity < 4) {
-        expandCompoundMsg(smsg, 4);
-    }
-    memset(smsg->msgBuffer + smsg->msgLen, 0, 4);
-}
+// void addNullTerminator(struct SerialMessage *smsg) {
+//     if (smsg->capacity < 4) {
+//         expandCompoundMsg(smsg, 4);
+//     }
+//     memset(smsg->msgBuffer + smsg->msgLen, 0, 4);
+// }
 
 
 
@@ -63,12 +67,12 @@ struct SerialMessage initSerialMsg() {
 }
 
 struct SerialMessage initSerialMsgCapacity(unsigned int capacity) {
+    if (capacity < 4) capacity = 4;
     struct SerialMessage smsg = {
-        malloc(capacity),
-        0,
-        capacity
+        .msgBuffer = malloc(capacity),
+        .msgLen = 4,
+        .capacity = capacity
     }; 
-    addNullTerminator(&smsg);
     return smsg;
 }
 
@@ -77,8 +81,7 @@ struct SerialMessage initSerialMsgFrom(unsigned char *buffer, unsigned int capac
         buffer,
         0,
         capacity
-    }; 
-    addNullTerminator(&smsg);
+    };
     return smsg;
 }
 
@@ -87,8 +90,7 @@ void deinitSerialMsg(struct SerialMessage *smsg) {
 }
 
 void clearRetainingCapacity(struct SerialMessage *smsg) {
-    smsg->msgLen = 0;
-    addNullTerminator(smsg);
+    smsg->msgLen = 4; // Retain empty prefix
 }
 
 void clearAndFree(struct SerialMessage *smsg) {
@@ -100,15 +102,18 @@ void clearAndFree(struct SerialMessage *smsg) {
 
 unsigned int serialFullLen(struct SerialMessage smsg) {
     if (smsg.msgBuffer == NULL) return 0;
-    return smsg.msgLen += 4;
+    return smsg.msgLen;
 }
 
 
+// Appending server close message
+
+// Worker function to do the append without bounds checking
 void serialMsgAppendServerCloseWorker(struct SerialMessage *smsg) {
     uint32_t msgCode = M_ServerClose;
-    memcpy(smsg->msgBuffer+smsg->msgLen, &msgCode, 4);
+    *(uint32_t*)(smsg->msgBuffer + smsg->msgLen) = msgCode;
+    // memcpy(smsg->msgBuffer+smsg->msgLen, &msgCode, 4);
     smsg->msgLen += 4;
-    addNullTerminator(smsg);
 }
 
 int serialMsgAppendServerClose(struct SerialMessage *smsg) {
@@ -123,27 +128,29 @@ int serialMsgAppendServerClose(struct SerialMessage *smsg) {
 
 void dynamicSerialMsgAppendServerClose(struct SerialMessage *smsg) {
     // Ensure cap is can fit string (with null term byte) + serial null terminator
-    const unsigned int msgSize = 4+4;
+    const unsigned int msgSize = 4;
     if (smsg->capacity - smsg->msgLen < msgSize) {
-        expandCompoundMsg(smsg, smsg->msgLen + msgSize);
+        expandSerialMsg(smsg, smsg->msgLen + msgSize);
     }
     serialMsgAppendServerCloseWorker(smsg);
 }
 
 
+// Appending string message
+
+// Worker function to do the append without bounds checking
 void serialMsgAppendStringWorker(struct SerialMessage *smsg, const char* str, int strLen) {
     uint32_t msgCode = M_String;
-    memcpy(smsg->msgBuffer+smsg->msgLen, &msgCode, 4);
+    *(uint32_t*)(smsg->msgBuffer + smsg->msgLen) = msgCode;
     smsg->msgLen += 4;
     memcpy(smsg->msgBuffer+smsg->msgLen, str, strLen+1);
     smsg->msgLen += strLen+1;
-    addNullTerminator(smsg);
 }
 
 int serialMsgAppendString(struct SerialMessage *smsg, const char* str) {
     int strLen = strlen(str);
-    // Ensure cap is can fit string (with null term byte) + serial null terminator
-    const unsigned int msgSize = 5+strLen + 4;
+    // Ensure cap is can fit string + serial null terminator
+    const unsigned int msgSize = 5+strLen;
     if (smsg->capacity - smsg->msgLen < msgSize) {
         return -1;
     }
@@ -153,29 +160,31 @@ int serialMsgAppendString(struct SerialMessage *smsg, const char* str) {
 
 void dynamicSerialMsgAppendString(struct SerialMessage *smsg, const char* str) {
     int strLen = strlen(str);
-    // Ensure cap is can fit string (with null term byte) + serial null terminator
-    const unsigned int msgSize = 5+strLen + 4;
+    // Ensure cap is can fit string + serial null terminator
+    const unsigned int msgSize = 5+strLen;
     if (smsg->capacity - smsg->msgLen < msgSize) {
-        expandCompoundMsg(smsg, smsg->msgLen + msgSize);
+        expandSerialMsg(smsg, smsg->msgLen + msgSize);
     }
     serialMsgAppendStringWorker(smsg, str, strLen);
 }
 
 
+// Appending key message
+
+// Worker function to do the append without bounds checking
 void serialMsgAppendKeyWorker(struct SerialMessage *smsg, enum KeyCode key) {
     uint32_t msgCode = M_Key;
-    memcpy(smsg->msgBuffer+smsg->msgLen, &msgCode, 4);
+    *(uint32_t*)(smsg->msgBuffer + smsg->msgLen) = msgCode;
     smsg->msgLen += 4;
 
     uint32_t u32keyCode = key;
-    memcpy(smsg->msgBuffer+smsg->msgLen, &u32keyCode, 4);
+    *(uint32_t*)(smsg->msgBuffer + smsg->msgLen) = u32keyCode;
     smsg->msgLen += 4;
-    addNullTerminator(smsg);
 }
 
 int serialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key) {
-    // Ensure cap is can fit press key signa and keycode + serial null terminator
-    const unsigned int msgSize = 8+4;
+    // Ensure cap is can fit press key signa and keycode
+    const unsigned int msgSize = 8;
     if (smsg->capacity - smsg->msgLen < msgSize) {
         return -1;
     }
@@ -184,41 +193,68 @@ int serialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key) {
 }
 
 void dynamicSerialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key) {
-    // Ensure cap is can fit press key signa and keycode + serial null terminator
-    const unsigned int msgSize = 8+4;
+    // Ensure cap is can fit press key signa and keycode
+    const unsigned int msgSize = 8;
     if (smsg->capacity - smsg->msgLen < msgSize) {
-        expandCompoundMsg(smsg, smsg->msgLen + msgSize);
+        expandSerialMsg(smsg, smsg->msgLen + msgSize);
     }
     serialMsgAppendKeyWorker(smsg, key);
 }
 
 
+// Appending Message object
 
-void serialMsgAppend(struct SerialMessage *smsg, struct Message other) {
+int serialMsgAppend(struct SerialMessage *smsg, struct Message other) {
     switch (other.type) {
-        case M_NULL: break;
-        case M_ServerClose: serialMsgAppendServerClose(smsg); break;
-        case M_String: serialMsgAppendString(smsg, other.msg.str); break;
-        case M_Key: serialMsgAppendKey(smsg, other.msg.key); break;
+        case M_ServerClose: return serialMsgAppendServerClose(smsg);
+        case M_String: return serialMsgAppendString(smsg, other.msg.str);
+        case M_Key: return serialMsgAppendKey(smsg, other.msg.key);
+        default: fprintf(stderr, "Unknown message type encountered\n"); return -1;
     }
 }
 
-void serialMsgAppendSerial(struct SerialMessage *smsg, struct SerialMessage other) {
+void dynamicSerialMsgAppend(struct SerialMessage *smsg, struct Message other) {
+    switch (other.type) {
+        case M_ServerClose: dynamicSerialMsgAppendServerClose(smsg); break;
+        case M_String: dynamicSerialMsgAppendString(smsg, other.msg.str); break;
+        case M_Key: dynamicSerialMsgAppendKey(smsg, other.msg.key); break;
+    }
+}
+
+
+// Appending serial message
+
+int serialMsgAppendSerial(struct SerialMessage *smsg, struct SerialMessage other) {
     // Ensure cap is can fit other msg size + serial null terminator
-    const unsigned int msgSize = (other.capacity - other.msgLen)+4;
+    const unsigned int msgSize = (other.msgLen - 4); // -4 to account prefix space
     if (smsg->capacity - smsg->msgLen < msgSize) {
-        expandCompoundMsg(smsg, smsg->msgLen + msgSize);
+        return -1;
     }
     
-    memcpy(smsg->msgBuffer + smsg->msgLen, other.msgBuffer, other.msgLen);
+    //                                                    v accounting for prefix space
+    memcpy(smsg->msgBuffer + smsg->msgLen, other.msgBuffer+4, other.msgLen-4);
     smsg->msgLen += other.msgLen;
-    addNullTerminator(smsg);
 }
+
+void dynamicSerialMsgAppendSerial(struct SerialMessage *smsg, struct SerialMessage other) {
+    // Ensure cap is can fit other msg size + serial null terminator
+    const unsigned int msgSize = (other.msgLen - 4); // -4 to account prefix space
+    if (smsg->capacity - smsg->msgLen < msgSize) {
+        expandSerialMsg(smsg, smsg->msgLen + msgSize);
+    }
+    
+    //                                                    v accounting for prefix space
+    memcpy(smsg->msgBuffer + smsg->msgLen, other.msgBuffer+4, other.msgLen-4);
+    smsg->msgLen += other.msgLen;
+}
+
+
+// Message extraction functions
 
 struct SerialExtractor serialExtractor(struct SerialMessage *smsg) {
     struct SerialExtractor extractor = {
         smsg,
-        0
+        4 // After reserved prefix
     };
     return extractor;
 }
@@ -231,7 +267,7 @@ enum MessageType readType(unsigned char *msgBuffer, unsigned int *pos) {
 
 const char *readString(unsigned char *msgBuffer, unsigned int *pos) {
     const unsigned char *strPtr = msgBuffer+*pos;
-    while (msgBuffer[*pos]) ++(*pos);
+    while (msgBuffer[*pos]) ++(*pos); // Move pos to after string
     ++(*pos);
     return strPtr;
 }
@@ -243,10 +279,9 @@ enum KeyCode readKeyCode(unsigned char *msgBuffer, unsigned int *pos) {
 }
 
 int extractMessage(struct SerialExtractor *extractor, struct Message *msg) {
-    if (extractor->pos >= extractor->smsg->msgLen+4) return -1;
+    if (extractor->pos >= extractor->smsg->msgLen) return 0;
     msg->type = readType(extractor->smsg->msgBuffer, &(extractor->pos));
     switch (msg->type) {
-        case M_NULL: return 0;
         case M_ServerClose: break;
         case M_String: msg->msg.str = readString(extractor->smsg->msgBuffer, &(extractor->pos)); break;
         case M_Key: msg->msg.key = readKeyCode(extractor->smsg->msgBuffer, &(extractor->pos)); break;
@@ -256,52 +291,3 @@ int extractMessage(struct SerialExtractor *extractor, struct Message *msg) {
     }
     return 1;
 }
-
-// // Serializes message writing to the given buffer. if message has type compound,
-// // null ptr can be passed as buffer and it will return the internal buffer of the compound message.
-// // If serialization fails due to buffer overflow or null buffer for non compound msg, return will be null
-// unsigned char *serializeMessage(struct Message msg, unsigned char *buffer, unsigned int bufferLen, unsigned int *used) {
-//     if (buffer == NULL && msg.type != M_Compound) return NULL;
-//     switch (msg.type){
-//         case M_Compound:
-//             // If buffer is not provided, just return the buffer of the compound msg
-//             // it is expected to be formated correctly and be null terminated
-//             // Otherwise copy the compound message buffer to the given buffer.
-//             // TODO: add validation step for confirming that the msgBuffer is correct
-//             *used = msg.msg.compound.msgLen;
-//             if (buffer == NULL) return msg.msg.compound.msgBuffer;
-//             if (msg.msg.compound.msgLen > bufferLen) return NULL; // Fail due to buffer overflow
-//             memcpy(buffer, msg.msg.compound.msgBuffer, msg.msg.compound.msgLen);
-//             return buffer;
-//         case M_Key:
-//             // fill buffer in following format <key signal><key code><null terminal (4 bytes)>,.
-//             if (bufferLen < 8+4) return NULL;
-//             uint32_t msgCode = M_Key;
-//             memcpy(buffer, &msgCode, 4);
-//             uint32_t u32keyCode = msg.msg.key;
-//             memcpy(buffer+sizeof(uint32_t), &u32keyCode, 4);
-//             *used = 8;
-//             break; // Adding msg null terminal after case stmt
-//         case M_ServerClose:
-//             // Fill buffer with following format <ServerClose signal><null terminal (4 bytes)>
-//             if (bufferLen < 4+4) return NULL;
-//             uint32_t msgCode = M_ServerClose;
-//             memcpy(buffer, &msgCode, 4);
-//             *used = 4;
-//             break; // Adding msg null terminal after case stmt
-//         case M_String:
-//             // Fill buffer in following format <Type String Signal><null terminated str><null terminal (4 bytes)>
-//             int strLen = strlen(msg.msg.str);
-//             if (bufferLen < strLen+5+4) return NULL;
-//             uint32_t msgCode = M_String;
-//             memcpy(buffer, &msgCode, 4);
-//             memcpy(buffer+sizeof(uint32_t), msg.msg.str, strLen+1);
-//             *used = 4+strLen+1;
-//             break; // Adding msg null terminal after case stmt
-//         default:
-//             return NULL;
-//     }
-//     memset(buffer+*used, 0, 4);
-//     *used += 4;
-//     return buffer;
-// }

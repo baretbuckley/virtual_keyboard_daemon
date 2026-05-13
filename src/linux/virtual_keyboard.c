@@ -103,3 +103,57 @@ enum Result tapKey(struct KeyBoard *keyboard, enum KeyCode key) {
 
     return Success;
 }
+
+
+
+
+// enum Result drainBuffer(struct KeyBoard *keyboard, int len) {
+//     UINT uSent = SendInput(len, keyboard->sendBuffer, sizeof(INPUT));
+//     if (uSent != len) {
+//         printf("SendInput failed: 0x%x\n", HRESULT_FROM_WIN32(GetLastError()));
+//     }
+//     ZeroMemory(keyboard->sendBuffer, sizeof(INPUT)*ARRAYSIZE(keyboard->sendBuffer));
+//     return Success;
+// }
+
+// int addInputPress(struct KeyBoard *keyboard, int pos, enum KeyCode key) {
+//     keyboard->sendBuffer[pos].type = INPUT_KEYBOARD;
+//     keyboard->sendBuffer[pos].ki.wVk = key;
+//     if (pos == ARRAYSIZE(keyboard->sendBuffer)-1) {
+//         drainBuffer(keyboard, pos+1);
+//         return 0;
+//     }
+//     return ++pos;
+// }
+
+// int addInputRelease(struct KeyBoard *keyboard, int pos, enum KeyCode key) {
+//     keyboard->sendBuffer[pos].type = INPUT_KEYBOARD;
+//     keyboard->sendBuffer[pos].ki.wVk = key;
+//     keyboard->sendBuffer[pos].ki.dwFlags = KEYEVENTF_KEYUP;
+//     if (pos == ARRAYSIZE(keyboard->sendBuffer)-1) {
+//         drainBuffer(keyboard, pos+1);
+//         return 0;
+//     }
+//     return ++pos;
+// }
+
+enum Result typeString(struct KeyBoard *keyboard, const char* str) {
+    int shift = 0;
+    int requiredShift = 0;
+    for (int i = 0; str[i]; i++) {
+
+        enum KeyCode key = charToKeyCode(str[i], &requiredShift);
+        if (requiredShift != shift) {
+            if (requiredShift)
+                pressKey(keyboard, K_Shift);
+            else
+                releaseKey(keyboard, K_Shift);
+            shift = requiredShift;
+        }
+
+        tapKey(keyboard, key);
+    }
+    if (shift)
+        releaseKey(keyboard, K_Shift);
+    return Success;
+}

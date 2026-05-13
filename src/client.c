@@ -3,7 +3,7 @@
 #include <commands.h>
 
 #include <stdio.h>
-#include <windows.h>
+// #include <windows.h>
 
 void cleanUp(struct ClientChannel *channel, struct SerialMessage smsg) {
     freeClientChannel(channel);
@@ -12,20 +12,19 @@ void cleanUp(struct ClientChannel *channel, struct SerialMessage smsg) {
 
 int main(int argc, char** argv) {
 
-    struct ClientChannel *channel = openChannel("vkeyd");
+    struct ClientChannel *channel = openChannel("vkeyd5");
     if (channel == NULL) {
         printf("Failed to open channel\n");
-        freeClientChannel(channel);
         return -1;
     }
 
-    struct SerialMessage smsg = initSerialMsg();
+    struct SerialMessage smsg = initSerialMsgCapacity(2048);
 
     int totalRead = 1;
     while (totalRead != argc) {
         int read;
         union CmdContext context;
-        switch (parse_command(argv + totalRead, &context, &read)) {
+        switch (parse_command((const char**)(argv + totalRead), &context, &read)) {
             case CMD_TYPE:
                 if (context.type.message == NULL) {
                     printf("Null message found\n");
@@ -43,6 +42,12 @@ int main(int argc, char** argv) {
                     break;
                 }
                 serialMsgAppendKey(&smsg, key);
+
+                break;
+            case CMD_CLOSE_SERVER:
+                printf("Found subcommand 'close-server'\n");
+
+                serialMsgAppendServerClose(&smsg);
 
                 break;
             case CMD_UNKNOWN:

@@ -12,8 +12,8 @@ const char* keycodeAsString(enum KeyCode code) {
         case K_ControlLeft:        return "ControlLeft";
         case K_ControlRight:       return "ControlRight";
         case K_Menu:               return "Menu";
-        case K_LMenu:              return "LMenu";
-        case K_RMenu:              return "RMenu";
+        // case K_LMenu:              return "LMenu";
+        // case K_RMenu:              return "RMenu";
         case K_Capital:            return "Captial";
         case K_Escape:             return "Escape";
         case K_Space:              return "Space";

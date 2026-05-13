@@ -8,7 +8,7 @@ enum KeyCode {
     K_UNKNOWN             = 0x0, // *DEFAULT* (flag used in auto file gen to signal default/unknown keycode)
     K_BackSpace           = KEY_BACKSPACE,
     K_Tab                 = KEY_TAB,
-    K_Return              = KEY_ENTER,
+    K_Return              = KEY_KPENTER, // TODO: KEY_ENTER doesn't work for some reason
     K_Shift               = KEY_LEFTSHIFT,
     K_LShift              = KEY_LEFTSHIFT,
     K_RShift              = KEY_RIGHTSHIFT,
@@ -30,7 +30,7 @@ enum KeyCode {
     K_Select              = KEY_SELECT,
     K_Print               = KEY_PRINT,
     K_Execute             = 0, // TODO: find replacement and if not do we need this key
-    K_Snapshot            = KEY_PRINT,
+    K_Snapshot            = KEY_SELECTIVE_SCREENSHOT, // TODO: Check if this is right conversion
     K_Insert              = KEY_INSERT,
     K_Delete              = KEY_DELETE,
     K_Help                = KEY_HELP,
@@ -115,7 +115,7 @@ enum KeyCode {
     K_F24                 = KEY_F24,
     K_Numlock             = KEY_NUMLOCK,
     K_Scroll              = 0, // TODO: IDK what the key is supposed to be doing
-    K_Equal               = KEY_EQUAL,   // '=' key on numpad
+    K_Equal               = 0,   // '=' key on numpad // TODO: what is numpad equal equivilant
     K_Colon_Semicolon     = KEY_SEMICOLON,   // ';:' for US
     K_Plus_Equal          = KEY_EQUAL,   // '+' any country
     K_Comma_LAngleBracket             = KEY_COMMA,   // ',' any country
