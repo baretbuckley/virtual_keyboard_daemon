@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <unistd.h>
+
 
 
 struct KeyBoard {
@@ -138,7 +140,7 @@ enum Result tapKey(struct KeyBoard *keyboard, enum KeyCode key) {
 //     return ++pos;
 // }
 
-enum Result typeString(struct KeyBoard *keyboard, const char* str) {
+enum Result typeString(struct KeyBoard *keyboard, const char* str, unsigned int delay) {
     // printf("Now typing string %s\n", str);
     int shift = 0;
     int requiredShift = 0;
@@ -152,8 +154,9 @@ enum Result typeString(struct KeyBoard *keyboard, const char* str) {
                 releaseKey(keyboard, K_Shift);
             shift = requiredShift;
         }
-
         tapKey(keyboard, key);
+        if (delay)
+            usleep(delay*1000);
     }
     if (shift)
         releaseKey(keyboard, K_Shift);

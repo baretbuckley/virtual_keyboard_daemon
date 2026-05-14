@@ -29,7 +29,7 @@ struct ServerChannel {
 int open_af_unix_socket(struct sockaddr_un *address, const char* name) {
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if(fd == -1) {
-        fprintf(stderr, "Failed to open AF_UNIX socket. ErrorNo=%d\n", errno);
+        fprintf(stderr, "Failed to open AF_UNIX socket: %s\n", strerror(errno));
         // Same as close channel
         close(fd);
         remove(address->sun_path);

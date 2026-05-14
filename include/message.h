@@ -3,10 +3,18 @@
 
 #include "keycode.h"
 
+#include <stdint.h>
+
 enum MessageType {
-    M_String = 0x01,
-    M_Key = 0x02,
-    M_ServerClose = 0x03,
+    M_Type = 0x01,          // Type <string> 
+    M_TypeDelay = 0x02,     // Type <string> with key delay of <u32> ms
+    M_Press = 0x03,         // Press <key>
+    M_Hold = 0x05,          // Press <key> and hold
+    M_Release = 0x06,       // Release <key>
+    M_PressFor = 0x04,      // Press <key> with a delay of <u32> ms before release
+    M_Delay = 0x07,         // Delay execution for <u32> ms
+    M_RepeatNext = 0x08,    // Repeat next command <u32> times with delay of <u32> ms between 
+    M_ServerClose = 0x09,   // Close server
 };
 
 // Serializes sequence of message to be <4 byte space> (<msg code>[msg value])*
@@ -24,11 +32,13 @@ struct SerialExtractor {
 };
 
 struct Message {
-    enum MessageType type;
     union {
         const char * str;
         enum KeyCode key;
+        uint32_t count;
     } msg;
+    enum MessageType type;
+    uint32_t delay;
 };
 
 // print message to stdout
@@ -61,18 +71,18 @@ void clearAndFree(struct SerialMessage *smsg);
 
 // non dynamic appends to serial message
 
-// Appends server close signal to the serial message
-// Returns -1 if buffer is out of space
-int serialMsgAppendServerClose(struct SerialMessage *smsg);
+// // Appends server close signal to the serial message
+// // Returns -1 if buffer is out of space
+// int serialMsgAppendServerClose(struct SerialMessage *smsg);
 
-// Appends string to the serial message
-// given string is copied to internal buffer
-// Returns -1 if buffer is out of space
-int serialMsgAppendString(struct SerialMessage *smsg, const char* str);
+// // Appends string to the serial message
+// // given string is copied to internal buffer
+// // Returns -1 if buffer is out of space
+// int serialMsgAppendType(struct SerialMessage *smsg, const char* str);
 
-// Appends key message to the serial message
-// Returns -1 if buffer is out of space
-int serialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key);
+// // Appends key message to the serial message
+// // Returns -1 if buffer is out of space
+// int serialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key);
 
 // Appends given message to the serial message object
 // Returns -1 if buffer is out of space
@@ -85,18 +95,18 @@ int serialMsgAppendSerial(struct SerialMessage *smsg, struct SerialMessage other
 
 // dynamic memory appending to serial message
 
-// Appends server close signal to the serial message
-// Dynamically grows internal buffer as need
-void dynamicSerialMsgAppendServerClose(struct SerialMessage *smsg);
+// // Appends server close signal to the serial message
+// // Dynamically grows internal buffer as need
+// void dynamicSerialMsgAppendServerClose(struct SerialMessage *smsg);
 
-// Appends string to the serial message
-// given string is copied to internal buffer
-// Dynamically grows internal buffer as need
-void dynamicSerialMsgAppendString(struct SerialMessage *smsg, const char* str);
+// // Appends string to the serial message
+// // given string is copied to internal buffer
+// // Dynamically grows internal buffer as need
+// void dynamicSerialMsgAppendString(struct SerialMessage *smsg, const char* str);
 
-// Appends key message to the serial message
-// Dynamically grows internal buffer as need
-void dynamicSerialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key);
+// // Appends key message to the serial message
+// // Dynamically grows internal buffer as need
+// void dynamicSerialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key);
 
 // Appends given message to the serial message object
 // Dynamically grows internal buffer as need

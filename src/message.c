@@ -7,14 +7,32 @@
 
 void printMessage(struct Message *msg) {
     switch (msg->type) {
-        case M_ServerClose:
-            printf("ServerClose\n");
-            break;
-        case M_String:
+        case M_Type:
             printf("Type String: '%s'\n", msg->msg.str);
             break;
-        case M_Key:
+        case M_TypeDelay:
+            printf("Type String: '%s' with a delay of %ims\n", msg->msg.str, msg->delay);
+            break;
+        case M_Press:
             printf("Tap key: %s\n", keycodeAsString(msg->msg.key));
+            break;
+        case M_Hold:
+            printf("Hold key: %s\n", keycodeAsString(msg->msg.key));
+            break;
+        case M_Release:
+            printf("Release key: %s\n", keycodeAsString(msg->msg.key));
+            break;
+        case M_PressFor:
+            printf("Tap key: %s for %ims\n", keycodeAsString(msg->msg.key), msg->delay);
+            break;
+        case M_Delay:
+            printf("Delay: %ims", msg->delay);
+            break;
+        case M_RepeatNext:
+            printf("Repeat next message: %i times with a delay of %ims\n", msg->msg.count, msg->delay);
+            break;
+        case M_ServerClose:
+            printf("ServerClose\n");
             break;
         default:
             printf("Un recognized Msg code %i\n", msg->type);
@@ -106,119 +124,203 @@ unsigned int serialFullLen(struct SerialMessage smsg) {
 }
 
 
-// Appending server close message
+// // Appending server close message
 
-// Worker function to do the append without bounds checking
-void serialMsgAppendServerCloseWorker(struct SerialMessage *smsg) {
-    uint32_t msgCode = M_ServerClose;
-    *(uint32_t*)(smsg->msgBuffer + smsg->msgLen) = msgCode;
-    // memcpy(smsg->msgBuffer+smsg->msgLen, &msgCode, 4);
-    smsg->msgLen += 4;
-}
+// // Worker function to do the append without bounds checking
+// void serialMsgAppendServerCloseWorker(struct SerialMessage *smsg) {
+//     uint32_t msgCode = M_ServerClose;
+//     *(uint32_t*)(smsg->msgBuffer + smsg->msgLen) = msgCode;
+//     // memcpy(smsg->msgBuffer+smsg->msgLen, &msgCode, 4);
+//     smsg->msgLen += 4;
+// }
 
-int serialMsgAppendServerClose(struct SerialMessage *smsg) {
-    // Ensure cap is can fit string (with null term byte) + serial null terminator
-    const unsigned int msgSize = 4+4;
-    if (smsg->capacity - smsg->msgLen < msgSize) {
-        return -1;
+// int serialMsgAppendServerClose(struct SerialMessage *smsg) {
+//     // Ensure cap is can fit string (with null term byte) + serial null terminator
+//     const unsigned int msgSize = 4+4;
+//     if (smsg->capacity - smsg->msgLen < msgSize) {
+//         return -1;
+//     }
+//     serialMsgAppendServerCloseWorker(smsg);
+//     return 0;
+// }
+
+// void dynamicSerialMsgAppendServerClose(struct SerialMessage *smsg) {
+//     // Ensure cap is can fit string (with null term byte) + serial null terminator
+//     const unsigned int msgSize = 4;
+//     if (smsg->capacity - smsg->msgLen < msgSize) {
+//         expandSerialMsg(smsg, smsg->msgLen + msgSize);
+//     }
+//     serialMsgAppendServerCloseWorker(smsg);
+// }
+
+
+// // Appending string message
+
+// // Worker function to do the append without bounds checking
+// void serialMsgAppendStringWorker(struct SerialMessage *smsg, const char* str, int strLen) {
+//     uint32_t msgCode = M_String;
+//     *(uint32_t*)(smsg->msgBuffer + smsg->msgLen) = msgCode;
+//     smsg->msgLen += 4;
+//     memcpy(smsg->msgBuffer+smsg->msgLen, str, strLen+1);
+//     smsg->msgLen += strLen+1;
+// }
+
+// int serialMsgAppendString(struct SerialMessage *smsg, const char* str) {
+//     int strLen = strlen(str);
+//     // Ensure cap is can fit string + serial null terminator
+//     const unsigned int msgSize = 5+strLen;
+//     if (smsg->capacity - smsg->msgLen < msgSize) {
+//         return -1;
+//     }
+//     serialMsgAppendStringWorker(smsg, str, strLen);
+//     return 0;
+// }
+
+// void dynamicSerialMsgAppendString(struct SerialMessage *smsg, const char* str) {
+//     int strLen = strlen(str);
+//     // Ensure cap is can fit string + serial null terminator
+//     const unsigned int msgSize = 5+strLen;
+//     if (smsg->capacity - smsg->msgLen < msgSize) {
+//         expandSerialMsg(smsg, smsg->msgLen + msgSize);
+//     }
+//     serialMsgAppendStringWorker(smsg, str, strLen);
+// }
+
+
+// // Appending key message
+
+// // Worker function to do the append without bounds checking
+// void serialMsgAppendKeyWorker(struct SerialMessage *smsg, enum KeyCode key) {
+//     uint32_t msgCode = M_Key;
+//     *(uint32_t*)(smsg->msgBuffer + smsg->msgLen) = msgCode;
+//     smsg->msgLen += 4;
+
+//     uint32_t u32keyCode = key;
+//     *(uint32_t*)(smsg->msgBuffer + smsg->msgLen) = u32keyCode;
+//     smsg->msgLen += 4;
+// }
+
+// int serialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key) {
+//     // Ensure cap is can fit press key signa and keycode
+//     const unsigned int msgSize = 8;
+//     if (smsg->capacity - smsg->msgLen < msgSize) {
+//         return -1;
+//     }
+//     serialMsgAppendKeyWorker(smsg, key);
+//     return 0;
+// }
+
+// void dynamicSerialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key) {
+//     // Ensure cap is can fit press key signa and keycode
+//     const unsigned int msgSize = 8;
+//     if (smsg->capacity - smsg->msgLen < msgSize) {
+//         expandSerialMsg(smsg, smsg->msgLen + msgSize);
+//     }
+//     serialMsgAppendKeyWorker(smsg, key);
+// }
+
+
+// // Appending Message object
+
+int assertLen(struct SerialMessage *smsg, int len, unsigned char isDynamic) {
+    if (smsg->capacity - smsg->msgLen < len) {
+        if (!isDynamic) return -1;
+        else expandSerialMsg(smsg, smsg->msgLen + len);
     }
-    serialMsgAppendServerCloseWorker(smsg);
     return 0;
 }
 
-void dynamicSerialMsgAppendServerClose(struct SerialMessage *smsg) {
-    // Ensure cap is can fit string (with null term byte) + serial null terminator
-    const unsigned int msgSize = 4;
-    if (smsg->capacity - smsg->msgLen < msgSize) {
-        expandSerialMsg(smsg, smsg->msgLen + msgSize);
-    }
-    serialMsgAppendServerCloseWorker(smsg);
-}
-
-
-// Appending string message
-
-// Worker function to do the append without bounds checking
-void serialMsgAppendStringWorker(struct SerialMessage *smsg, const char* str, int strLen) {
-    uint32_t msgCode = M_String;
+void appendType(struct SerialMessage *smsg, enum MessageType type) {
+    uint32_t msgCode = type;
     *(uint32_t*)(smsg->msgBuffer + smsg->msgLen) = msgCode;
     smsg->msgLen += 4;
+}
+
+void appendStr(struct SerialMessage *smsg, const char *str, unsigned int strLen) {
     memcpy(smsg->msgBuffer+smsg->msgLen, str, strLen+1);
     smsg->msgLen += strLen+1;
 }
 
-int serialMsgAppendString(struct SerialMessage *smsg, const char* str) {
-    int strLen = strlen(str);
-    // Ensure cap is can fit string + serial null terminator
-    const unsigned int msgSize = 5+strLen;
-    if (smsg->capacity - smsg->msgLen < msgSize) {
-        return -1;
-    }
-    serialMsgAppendStringWorker(smsg, str, strLen);
-    return 0;
-}
-
-void dynamicSerialMsgAppendString(struct SerialMessage *smsg, const char* str) {
-    int strLen = strlen(str);
-    // Ensure cap is can fit string + serial null terminator
-    const unsigned int msgSize = 5+strLen;
-    if (smsg->capacity - smsg->msgLen < msgSize) {
-        expandSerialMsg(smsg, smsg->msgLen + msgSize);
-    }
-    serialMsgAppendStringWorker(smsg, str, strLen);
-}
-
-
-// Appending key message
-
-// Worker function to do the append without bounds checking
-void serialMsgAppendKeyWorker(struct SerialMessage *smsg, enum KeyCode key) {
-    uint32_t msgCode = M_Key;
-    *(uint32_t*)(smsg->msgBuffer + smsg->msgLen) = msgCode;
-    smsg->msgLen += 4;
-
+void appendKeycode(struct SerialMessage *smsg, enum KeyCode key) {
     uint32_t u32keyCode = key;
     *(uint32_t*)(smsg->msgBuffer + smsg->msgLen) = u32keyCode;
     smsg->msgLen += 4;
 }
 
-int serialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key) {
-    // Ensure cap is can fit press key signa and keycode
-    const unsigned int msgSize = 8;
-    if (smsg->capacity - smsg->msgLen < msgSize) {
-        return -1;
+void appendU32(struct SerialMessage *smsg, uint32_t value) {
+    *(uint32_t*)(smsg->msgBuffer + smsg->msgLen) = value;
+    smsg->msgLen += 4;
+}
+
+int serialMsgAppendWorker(struct SerialMessage *smsg, struct Message other, unsigned char isDynamic) {
+    int stringLen;
+    int msgSize;
+    switch (other.type) {
+        case M_Type:
+            // <Type> <string>
+            stringLen = strlen(other.msg.str);
+            msgSize = 4+stringLen+1; // Msg type + strlen + null-terminal 
+            if (assertLen(smsg, msgSize, isDynamic)) return -1;
+            appendType(smsg, other.type);
+            appendStr(smsg, other.msg.str, stringLen);
+            break;
+        case M_TypeDelay:
+            // <Type> <delay> <string>
+            stringLen = strlen(other.msg.str);
+            msgSize = 8+stringLen+1; // Msg type + delay + strlen + null-terminal 
+            if (assertLen(smsg, msgSize, isDynamic)) return -1;
+            appendType(smsg, other.type);
+            appendU32(smsg, other.delay);
+            appendStr(smsg, other.msg.str, stringLen);
+            break;
+        case M_Press:
+        case M_Hold:
+        case M_Release:
+            // <Type> <keycode>
+            msgSize = 8; // Msg type + keycode 
+            if (assertLen(smsg, msgSize, isDynamic)) return -1;
+            appendType(smsg, other.type);
+            appendU32(smsg, other.msg.key);
+            break;
+        case M_PressFor:
+            // <Type> <delay> <keycode>
+            msgSize = 12; // Msg type + delay + keycode 
+            if (assertLen(smsg, msgSize, isDynamic)) return -1;
+            appendType(smsg, other.type);
+            appendU32(smsg, other.delay);
+            appendU32(smsg, other.msg.key);
+            break;
+        case M_Delay:
+            // <Type> <delay>
+            msgSize = 8; // Msg type + delay 
+            if (assertLen(smsg, msgSize, isDynamic)) return -1;
+            appendType(smsg, other.type);
+            appendU32(smsg, other.delay);
+            break;
+        case M_RepeatNext:
+            // <Type> <count> <delay>
+            msgSize = 12; // Msg type + count + delay 
+            if (assertLen(smsg, msgSize, isDynamic)) return -1;
+            appendType(smsg, other.type);
+            appendU32(smsg, other.delay);
+            break;
+        case M_ServerClose:
+            // <Type>
+            msgSize = 12; // Msg type + count + delay 
+            if (assertLen(smsg, msgSize, isDynamic)) return -1;
+            appendType(smsg, other.type);
+            break;
+        default: fprintf(stderr, "Unknown message type encountered\n"); return -1;
     }
-    serialMsgAppendKeyWorker(smsg, key);
     return 0;
 }
 
-void dynamicSerialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key) {
-    // Ensure cap is can fit press key signa and keycode
-    const unsigned int msgSize = 8;
-    if (smsg->capacity - smsg->msgLen < msgSize) {
-        expandSerialMsg(smsg, smsg->msgLen + msgSize);
-    }
-    serialMsgAppendKeyWorker(smsg, key);
-}
-
-
-// Appending Message object
-
 int serialMsgAppend(struct SerialMessage *smsg, struct Message other) {
-    switch (other.type) {
-        case M_ServerClose: return serialMsgAppendServerClose(smsg);
-        case M_String: return serialMsgAppendString(smsg, other.msg.str);
-        case M_Key: return serialMsgAppendKey(smsg, other.msg.key);
-        default: fprintf(stderr, "Unknown message type encountered\n"); return -1;
-    }
+    return serialMsgAppendWorker(smsg, other, 0); // Append without dynamically expanding memory
 }
 
 void dynamicSerialMsgAppend(struct SerialMessage *smsg, struct Message other) {
-    switch (other.type) {
-        case M_ServerClose: dynamicSerialMsgAppendServerClose(smsg); break;
-        case M_String: dynamicSerialMsgAppendString(smsg, other.msg.str); break;
-        case M_Key: dynamicSerialMsgAppendKey(smsg, other.msg.key); break;
-    }
+    serialMsgAppendWorker(smsg, other, 1); // Append while allowing dynamically expanding memory
 }
 
 
@@ -279,16 +381,49 @@ enum KeyCode readKeyCode(unsigned char *msgBuffer, unsigned int *pos) {
     return (enum KeyCode)type32bit;
 }
 
+uint32_t readU32(unsigned char *msgBuffer, unsigned int *pos) {
+    uint32_t type32bit = *((uint32_t*)(msgBuffer + *pos)); // read as 32bit to ensure consistant byte count
+    (*pos) += 4;
+    return type32bit;
+}
+
 int extractMessage(struct SerialExtractor *extractor, struct Message *msg) {
     if (extractor->pos >= extractor->smsg->msgLen) return 0;
     msg->type = readType(extractor->smsg->msgBuffer, &(extractor->pos));
     switch (msg->type) {
-        case M_ServerClose: break;
-        case M_String: msg->msg.str = readString(extractor->smsg->msgBuffer, &(extractor->pos)); break;
-        case M_Key: msg->msg.key = readKeyCode(extractor->smsg->msgBuffer, &(extractor->pos)); break;
-        default: 
-            printf("Failed to extract message type %i\n", msg->type); 
-            return -1;
+        case M_Type:
+            // <Type> . <string>
+            msg->msg.str = readString(extractor->smsg->msgBuffer, &(extractor->pos));
+            break;
+        case M_TypeDelay:
+            // <Type> . <delay> <string>
+            msg->delay = readU32(extractor->smsg->msgBuffer, &(extractor->pos));
+            msg->msg.str = readString(extractor->smsg->msgBuffer, &(extractor->pos));
+            break;
+        case M_Press:
+        case M_Hold:
+        case M_Release:
+            // <Type> . <keycode>
+            msg->msg.key = readKeyCode(extractor->smsg->msgBuffer, &(extractor->pos));
+            break;
+        case M_PressFor:
+            // <Type> . <delay> <keycode>
+            msg->delay = readU32(extractor->smsg->msgBuffer, &(extractor->pos));
+            msg->msg.key = readKeyCode(extractor->smsg->msgBuffer, &(extractor->pos));
+            break;
+        case M_Delay:
+            // <Type> . <delay>
+            msg->delay = readU32(extractor->smsg->msgBuffer, &(extractor->pos));
+            break;
+        case M_RepeatNext:
+            // <Type> . <count> <delay>
+            msg->msg.count = readU32(extractor->smsg->msgBuffer, &(extractor->pos));
+            msg->delay = readU32(extractor->smsg->msgBuffer, &(extractor->pos));
+            break;
+        case M_ServerClose:
+            // <Type> .
+            break;
+        default: fprintf(stderr, "Unknown message type encountered\n"); return -1;
     }
     return 1;
 }

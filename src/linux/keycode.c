@@ -27,7 +27,7 @@ const char* keycodeAsString(enum KeyCode code) {
         case K_Down:               return "Down";
         case K_Select:             return "Select";
         case K_Print:              return "Print";
-        case K_Execute:            return "Execute";
+        // case K_Execute:            return "Execute";
         case K_Snapshot:           return "Snapshot";
         case K_Insert:             return "Insert";
         case K_Delete:             return "Delete";

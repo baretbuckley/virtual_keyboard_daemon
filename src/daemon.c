@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-
+#include <unistd.h>
 
 // #pragma comment(lib, "Ws2_32.lib")
 
@@ -23,7 +23,8 @@ void cleanUp() {
     if (channel) {
         closeChannel(channel);
         freeServerChannel(channel);
-    } else {
+    }
+    if (keyboard) {
         deleteKeyBoard(keyboard);
     }
 }
@@ -50,7 +51,7 @@ int main() {
     }
 
     // Create channel
-    channel = createChannel("vkeyd5");
+    channel = createChannel("vkeyd");
 
 
     if (!channel) {
@@ -91,8 +92,33 @@ int main() {
                     break;
                 }
                 switch (msg.type) {
-                    case M_Key: tapKey(keyboard, msg.msg.key); break;
-                    case M_String: typeString(keyboard, msg.msg.str); break;
+                    case M_Type:
+                        typeString(keyboard, msg.msg.str, 0);
+                        break;
+                    case M_TypeDelay:
+                        typeString(keyboard, msg.msg.str, msg.delay);
+                        break;
+                    case M_Press:
+                        tapKey(keyboard, msg.msg.key);
+                        break;
+                    case M_Hold:
+                        pressKey(keyboard, msg.msg.key);
+                        break;
+                    case M_Release:
+                        releaseKey(keyboard, msg.msg.key);
+                        break;
+                    case M_PressFor:
+                        printf("Pressing %s with a delay of %i\n", keycodeAsString(msg.msg.key), msg.delay);
+                        pressKey(keyboard, msg.msg.key);
+                        usleep(msg.delay*1000);
+                        releaseKey(keyboard, msg.msg.key);
+                        break;
+                    case M_Delay:
+                        usleep(msg.delay*1000);
+                        break;
+                    case M_RepeatNext:
+                        fprintf(stderr, "Warning repeat command not currently supported\n");
+                        break;
                     case M_ServerClose:
                         printf("Closing server\n");
                         cleanUp();

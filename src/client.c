@@ -12,7 +12,7 @@ void cleanUp(struct ClientChannel *channel, struct SerialMessage smsg) {
 
 int main(int argc, char** argv) {
 
-    struct ClientChannel *channel = openChannel("vkeyd5");
+    struct ClientChannel *channel = openChannel("vkeyd");
     if (channel == NULL) {
         printf("Failed to open channel\n");
         return -1;
@@ -21,9 +21,12 @@ int main(int argc, char** argv) {
     struct SerialMessage smsg = initSerialMsgCapacity(2048);
 
     int totalRead = 1;
+    struct Message msg;
     while (totalRead != argc) {
         int read;
         union CmdContext context;
+
+        // Build msg object from command line arguments
         switch (parse_command((const char**)(argv + totalRead), &context, &read)) {
             case CMD_TYPE:
                 if (context.type.message == NULL) {
@@ -31,7 +34,14 @@ int main(int argc, char** argv) {
                     break;
                 }
                 printf("Found subcommand 'type', delay = %i, message = '%s'\n", context.type.char_delay_ms, context.type.message);
-                serialMsgAppendString(&smsg, context.type.message);
+                if (context.type.char_delay_ms) {
+                    msg.type = M_TypeDelay;
+                    msg.msg.str = context.type.message;
+                    msg.delay = context.type.char_delay_ms;
+                } else {
+                    msg.type = M_Type;
+                    msg.msg.str = context.type.message;
+                } 
 
                 break;
             case CMD_PRESS:
@@ -41,22 +51,37 @@ int main(int argc, char** argv) {
                     printf("Unknown key '%s'", context.press.key);
                     break;
                 }
-                serialMsgAppendKey(&smsg, key);
+                if (context.press.hold) {
+                    if (context.press.press_delay_ms) {
+                        fprintf(stderr, "The press command does not allow the use of the --hold and --hold-for flag at the same time\nrun 'vkey --help' for usage");
+                        return -1;
+                    }
+                    fprintf(stderr, "The --hold flag is being deactivated until the release command is supported");
+                    return -1;
+                } else if (context.press.press_delay_ms) {
+                    msg.type = M_PressFor;
+                    msg.msg.key = key;
+                    msg.delay = context.press.press_delay_ms;
+                } else {
+                    msg.type = M_Press;
+                    msg.msg.key = key;
+                }
 
                 break;
             case CMD_CLOSE_SERVER:
                 printf("Found subcommand 'close-server'\n");
 
-                serialMsgAppendServerClose(&smsg);
+                msg.type = M_ServerClose;
 
                 break;
             case CMD_UNKNOWN:
                 printf("Found Unknown subcommand\n");
-                break;;
+                break;
             default:
                 printf("Real unknown found\n");
                 break;
         }
+        serialMsgAppend(&smsg, msg);
         totalRead += read;
     }
 
@@ -64,6 +89,7 @@ int main(int argc, char** argv) {
     if (smsg.msgLen != 0) {
         if ((written = sendMessage(channel, smsg)) < 0) {
             printf("Failed to write to file\n");
+            disconnect(channel);
             freeClientChannel(channel);
             return -1;
         }
