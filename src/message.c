@@ -234,6 +234,7 @@ int serialMsgAppendSerial(struct SerialMessage *smsg, struct SerialMessage other
     //                                                    v accounting for prefix space
     memcpy(smsg->msgBuffer + smsg->msgLen, other.msgBuffer+4, other.msgLen-4);
     smsg->msgLen += other.msgLen;
+    return 0;
 }
 
 void dynamicSerialMsgAppendSerial(struct SerialMessage *smsg, struct SerialMessage other) {

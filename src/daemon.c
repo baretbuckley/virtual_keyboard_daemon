@@ -8,23 +8,53 @@
 // #include <ws2tcpip.h>
 // #include <iphlpapi.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
 
 
 // #pragma comment(lib, "Ws2_32.lib")
 
+
+
+static struct KeyBoard *keyboard = NULL;
+static struct ServerChannel *channel = NULL;
+
+void cleanUp() {
+    if (channel) {
+        closeChannel(channel);
+        freeServerChannel(channel);
+    } else {
+        deleteKeyBoard(keyboard);
+    }
+}
+
+void sig_int_close(int sig){
+    cleanUp();
+    exit(-1);
+}
+
+
 int main() {
     // int bytesRead;
+
+    signal(SIGINT, sig_int_close);
+
     struct SerialMessage *msgRef;
 
-    struct KeyBoard *keyboard = createKeyBoard();
+
+    keyboard = createKeyBoard();
+
+    if (!keyboard) {
+        printf("Failed to create virtual keyboard\n");
+        return -1;
+    }
 
     // Create channel
-    struct ServerChannel *channel = createChannel("vkeyd5");
+    channel = createChannel("vkeyd5");
 
 
     if (!channel) {
         printf("Failed to create channel\n");
-        freeServerChannel(channel);
         return -1;
     }
 
@@ -34,7 +64,7 @@ int main() {
         printf("Connecting\n");
         if (waitConnection(channel)) {
             printf("Failed to connect to client\n");
-            freeServerChannel(channel);
+            cleanUp();
             return -1;
         }
 
@@ -49,7 +79,7 @@ int main() {
             
             if (msgRef == NULL) {
                 printf("Failed to read from pipe.");
-                freeServerChannel(channel);
+                cleanUp();
                 return -1;
             }
             struct SerialExtractor extractor = serialExtractor(msgRef);
@@ -65,9 +95,7 @@ int main() {
                     case M_String: typeString(keyboard, msg.msg.str); break;
                     case M_ServerClose:
                         printf("Closing server\n");
-                        closeChannel(channel);
-                        freeServerChannel(channel);
-                        deleteKeyBoard(keyboard);
+                        cleanUp();
                         return 0;
                     default:
                         printf("Unrecognized Message type.");

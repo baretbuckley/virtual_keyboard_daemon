@@ -61,6 +61,7 @@ struct KeyBoard *createKeyBoard() {
 void deleteKeyBoard(struct KeyBoard *keyboard) {
     ioctl(keyboard->fd, UI_DEV_DESTROY);
     close(keyboard->fd);
+    free(keyboard);
 }
 
 void emit(int fd, int type, int code, int val) {
@@ -138,6 +139,7 @@ enum Result tapKey(struct KeyBoard *keyboard, enum KeyCode key) {
 // }
 
 enum Result typeString(struct KeyBoard *keyboard, const char* str) {
+    // printf("Now typing string %s\n", str);
     int shift = 0;
     int requiredShift = 0;
     for (int i = 0; str[i]; i++) {
@@ -155,5 +157,6 @@ enum Result typeString(struct KeyBoard *keyboard, const char* str) {
     }
     if (shift)
         releaseKey(keyboard, K_Shift);
+
     return Success;
 }
