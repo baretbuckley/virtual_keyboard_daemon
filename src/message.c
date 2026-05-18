@@ -222,7 +222,7 @@ unsigned int serialFullLen(struct SerialMessage smsg) {
 
 // // Appending Message object
 
-int assertLen(struct SerialMessage *smsg, int len, unsigned char isDynamic) {
+int assertLen(struct SerialMessage *smsg, unsigned int len, unsigned char isDynamic) {
     if (smsg->capacity - smsg->msgLen < len) {
         if (!isDynamic) return -1;
         else expandSerialMsg(smsg, smsg->msgLen + len);
@@ -306,7 +306,7 @@ int serialMsgAppendWorker(struct SerialMessage *smsg, struct Message other, unsi
             break;
         case M_ServerClose:
             // <Type>
-            msgSize = 12; // Msg type + count + delay 
+            msgSize = 4; // Msg type + count + delay 
             if (assertLen(smsg, msgSize, isDynamic)) return -1;
             appendType(smsg, other.type);
             break;
@@ -369,7 +369,7 @@ enum MessageType readType(unsigned char *msgBuffer, unsigned int *pos) {
 }
 
 const char *readString(unsigned char *msgBuffer, unsigned int *pos) {
-    const unsigned char *strPtr = msgBuffer+*pos;
+    const char *strPtr = msgBuffer+*pos;
     while (msgBuffer[*pos]) ++(*pos); // Move pos to after string
     ++(*pos);
     return strPtr;

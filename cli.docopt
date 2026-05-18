@@ -1,0 +1,5 @@
+
+
+
+Usage:
+    vkey [(type [(-d|--delay) <string>]) | (press [( (-h|--hold) | --hold-for=<delay> )] <key>) | (release <keycode>) | (repeat ((-d|--repeat-delay)=<delay>) <count>) | (close-server) ]...

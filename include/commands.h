@@ -13,6 +13,7 @@ enum CommandType {
     CMD_TYPE = 3,
     CMD_PRESS = 4,
     CMD_DELAY = 5,
+    CMD_RELEASE = 6,
     FLAG_HELP = -2, // help flag is returned in place of comand when encountered
     CMD_UNKNOWN = 0,
 };
@@ -24,11 +25,6 @@ struct RepeatCmdContext {
     int repeat_delay_ms;
 };
 static struct RepeatCmdContext default_repeat_context = {0, 0};
-
-
-// struct CloseServerCmdContext {
-// };
-// static struct CloseServerCmdContext default_close_server_context = {};
 
 
 struct TypeCmdContext {
@@ -46,30 +42,32 @@ struct PressCmdContext {
 static struct PressCmdContext default_press_context = {"", 0, 0};
 
 
-
 struct DelayCmdContext {
-    unsigned int press_delay_ms;
+    unsigned int delay_ms;
 };
-static struct PressCmdContext DEFAULT_DELAY_CONTEXT = {0};
+static struct DelayCmdContext DEFAULT_DELAY_CONTEXT = {0};
+
+
+struct ReleaseCmdContext {
+    const char *key;
+};
+static struct ReleaseCmdContext DEFAULT_RELEASE_CONTEXT = {""};
 
 union CmdContext {
     struct TypeCmdContext type;
     struct PressCmdContext press;
+    struct RepeatCmdContext repeat;
+    struct DelayCmdContext delay;
+    struct ReleaseCmdContext release;
 };
-
-
 
 enum CommandParseResult {
     CMD_PARSE_SUCCESS = 0,
-    CMD_PARSE_UNKNOWN_FLAG = -1,
-    CMD_PARSE_REPEATED_FLAG = -2,
-    CMD_PARSE_INVALID_FLAG_VALUE = -3, 
-    CMD_PARSE_MISSING_VALUE = -4,
-    CMD_PARSE_INVALID_VALUE = -5,
-    CMD_PARSE_HELP = -6,
+    CMD_PARSE_ERROR = -1,
+    CMD_PARSE_HELP = -2,
 };
 
-enum CommandParseResult parse_repeat_command(const char** input, struct RepeatCmdContext* context, int *read);
+// enum CommandParseResult parse_repeat_command(const char** input, struct RepeatCmdContext* context, int *read);
 
 
 enum CommandType parse_command(const char** input, union CmdContext* context, int *read);

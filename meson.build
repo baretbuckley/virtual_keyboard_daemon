@@ -13,7 +13,7 @@ elif build_machine.system() == 'linux'
 endif
 src_files = ['src/message.c']
 
-client_src = ['src/client.c', 'src/commands.c', 'src/keycodeFromStr.c']
+client_src = ['src/client.c', 'src/commands.c', 'src/keycodeFromStr.c', 'src/parse_option.c']
 
 
 # executable('demo',
@@ -21,12 +21,12 @@ client_src = ['src/client.c', 'src/commands.c', 'src/keycodeFromStr.c']
 #            include_directories : incdir,
 #            install : true)
 
-executable('daemon',
+executable('vkeyd',
            ['src/daemon.c'] + src_files + os_src,
            include_directories : incdir,
            install : true)
 
-executable('client',
+executable('vkey',
            client_src + src_files + os_src,
            include_directories : incdir,
            install : true)
