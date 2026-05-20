@@ -8,14 +8,14 @@ enum KeyCode {
     K_UNKNOWN             = 0x0, // *DEFAULT* (flag used in auto file gen to signal default/unknown keycode)
     K_BackSpace           = KEY_BACKSPACE,
     K_Tab                 = KEY_TAB,
-    K_Return              = KEY_KPENTER, // TODO: KEY_ENTER doesn't work for some reason
+    K_Return              = KEY_ENTER, // TODO: KEY_ENTER doesn't work for some reason
     K_Shift               = KEY_LEFTSHIFT,
     K_LShift              = KEY_LEFTSHIFT,
     K_RShift              = KEY_RIGHTSHIFT,
     K_Control             = KEY_LEFTCTRL,
     K_ControlLeft         = KEY_LEFTCTRL,
     K_ControlRight        = KEY_RIGHTCTRL,
-    K_Menu                = KEY_MENU,
+    K_Menu                = KEY_MENU, // Todo check if this is right. Does windows use menue for alt?
     K_Capital             = KEY_CAPSLOCK,
     K_Escape              = KEY_ESC,
     K_Space               = KEY_SPACE,

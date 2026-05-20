@@ -15,6 +15,7 @@ src_files = ['src/message.c']
 
 client_src = ['src/client.c', 'src/commands.c', 'src/keycodeFromStr.c', 'src/parse_option.c']
 
+tool_src = ['src/linux/keycode.c']
 
 # executable('demo',
 #            ['src/main.c'] + src_files + os_src,
@@ -31,6 +32,10 @@ executable('vkey',
            include_directories : incdir,
            install : true)
 
+executable('vkeytool',
+           ['src/vkeytool/vkeytool.c'] + tool_src,
+           include_directories: incdir,
+           install : true)
 
 # executable('linux_test',
 #   ['src/linux_test.c', 'src/linux/virtual_keyboard.c'],
