@@ -67,19 +67,19 @@ int parsePositiveInt(const char *valueStr) {
 
 
 void printSubCommandUsage(const char *usage) {
-    printf(usage);
+    printf("%s", usage);
     printf("Run 'vkey --help' for full help message");
 }
 
 
 void printFullUsage() {
-    printf(FULL_USAGE);
-    printf(TYPE_USAGE);
-    printf(PRESS_USAGE);
-    printf(RELEASE_USAGE);
-    printf(CLOSE_SERVER_USAGE);
-    printf(REPEAT_USAGE);
-    printf(DELAY_USAGE);
+    printf("%s", FULL_USAGE);
+    printf("%s", TYPE_USAGE);
+    printf("%s", PRESS_USAGE);
+    printf("%s", RELEASE_USAGE);
+    printf("%s", CLOSE_SERVER_USAGE);
+    printf("%s", REPEAT_USAGE);
+    printf("%s", DELAY_USAGE);
 }
 
 void reportRepeatedOption(const char **argv) {
