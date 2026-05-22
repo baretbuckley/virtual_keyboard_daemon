@@ -35,11 +35,15 @@ static struct TypeCmdContext default_type_context = {"", 0};
 
 
 struct PressCmdContext {
-    const char *key;
+    union {
+        const char *key;
+        unsigned int keycode;
+    };
     unsigned int press_delay_ms;
     unsigned char hold;
+    unsigned char byKeycode;
 };
-static struct PressCmdContext default_press_context = {"", 0, 0};
+static struct PressCmdContext default_press_context = {"", 0, 0, 0};
 
 
 struct DelayCmdContext {
@@ -70,7 +74,7 @@ enum CommandParseResult {
 // enum CommandParseResult parse_repeat_command(const char** input, struct RepeatCmdContext* context, int *read);
 
 
-enum CommandType parse_command(const char** input, union CmdContext* context, int *read);
+enum CommandType parseCommand(const char** input, union CmdContext* context, int *read);
 
 
 

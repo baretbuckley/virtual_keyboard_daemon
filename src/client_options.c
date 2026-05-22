@@ -1,4 +1,4 @@
-#include <commands.h>
+#include <client_options.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -33,6 +33,8 @@ const char *PRESS_USAGE =
 "\npress                      Repeat the following command a specified number of times.\n"
 "  --help                       Show help message for the 'press' subcommand\n"
 "  -h, --hold                   Holds the key without releasing (use the release command to release the key)\n"
+"                                   any keys still held at the end of the command will be released\n"
+"  -k --keycode                 Specify the key by it's keycode, exact values are determined by the operating system\n"
 "  --hold-for <ms>              delay between pressing and releasing the key (not compatable with using --hold)\n"
 "  <key>                        the key to press\n";
 
@@ -48,7 +50,7 @@ const char *RELEASE_USAGE =
 
 
 
-int parse_positive_int(const char *valueStr) {
+int parsePositiveInt(const char *valueStr) {
     // Read in integer value and ensure it is valid
     int res = 0;
     // Bounds check incase input is '0'
@@ -114,7 +116,7 @@ SET_MEMBERS |= SET_FLAG;
 // ARG          : String to read unsigned int from
 // VALUE_STORE  : Variable to store resut in
 #define READ_UNSIGNED_INT_ARG(ARG, VALUE_STORE) \
-int res = parse_positive_int(ARG);                      \
+int res = parsePositiveInt(ARG);                      \
 if (res < 0) {                                          \
     reportInvalidPositiveIntArg(input, arg);            \
     return CMD_PARSE_ERROR;                             \
@@ -127,7 +129,7 @@ VALUE_STORE = res;
 static const struct Option REPEAT_OPTIONS[] = {
     {"repeat-delay", sizeof("repeat-delay")-1, 'd', 1}
 };
-int parse_repeat_command(const char** input, struct RepeatCmdContext* context, int *read) {
+int parseRepeatCommand(const char** input, struct RepeatCmdContext* context, int *read) {
     unsigned int set_members = 0;
     enum MemberFlags {
         REPEAT_DELAY_SET = 1 << 0,
@@ -164,7 +166,7 @@ int parse_repeat_command(const char** input, struct RepeatCmdContext* context, i
         return -1;
     }
     
-    context->count = parse_positive_int(arg);
+    context->count = parsePositiveInt(arg);
     if (context->count < 0) {
         reportInvalidPositiveIntArg(input, arg);
         return CMD_PARSE_ERROR;
@@ -175,11 +177,13 @@ int parse_repeat_command(const char** input, struct RepeatCmdContext* context, i
     return 0;
 }
 
+
+
+
 static const struct Option TYPE_OPTIONS[] = {
     {"key-delay", sizeof("key-delay")-1, 'd', 1}
 };
-
-int parse_type_command(const char** input, struct TypeCmdContext* context, int *read) {
+int parseTypeCommand(const char** input, struct TypeCmdContext* context, int *read) {
     unsigned int set_members = 0;
     enum MemberFlags {
         KEY_DELAY_SET = 1 << 0,
@@ -225,16 +229,17 @@ int parse_type_command(const char** input, struct TypeCmdContext* context, int *
 
 
 
-
 static const struct Option PRESS_OPTIONS[] = {
     {"hold", sizeof("hold")-1, 'h', 0},
-    {"hold-for", sizeof("hold-for")-1, '\0', 1}
+    {"hold-for", sizeof("hold-for")-1, '\0', 1},
+    {"keycode", sizeof("keycode")-1, 'k', 0}
 };
-int parse_press_command(const char** input, struct PressCmdContext* context, int *read) {
+int parsePressCommand(const char** input, struct PressCmdContext* context, int *read) {
     unsigned int set_members = 0;
     enum MemberFlags {
         HOLD_SET = 1 << 0,
         HOLD_FOR_SET = 1 << 1,
+        KEYCODE_SET = 1 << 2,
     };
     set_optind(1);
     *context = default_press_context;
@@ -250,6 +255,11 @@ int parse_press_command(const char** input, struct PressCmdContext* context, int
             case 1: // hold-for
                 ASSERT_NON_REPEAT(HOLD_FOR_SET, set_members)
                 READ_UNSIGNED_INT_ARG(arg, context->press_delay_ms)
+                break;
+            
+            case 2: // keycode
+                ASSERT_NON_REPEAT(KEYCODE_SET, set_members)
+                context->byKeycode = 1;
                 break;
 
             case OPT_PARSE_NOT_AN_OPT:
@@ -267,12 +277,20 @@ int parse_press_command(const char** input, struct PressCmdContext* context, int
     break_opt_loop:
 
     if (parse_arg(input, &arg)) {
-        fprintf(stderr, "press: missing subcommand argument <keycode>\n");
+        fprintf(stderr, "press: missing subcommand argument <key>\n");
         fprintf(stderr, "Try 'vkey --help' for more information.\n");
         return -1;
     }
-    context->key = arg;
-
+    if (context->byKeycode) {
+        int res = parsePositiveInt(arg);
+        if (res < 0) {
+            reportInvalidPositiveIntArg(input, arg);
+            return CMD_PARSE_ERROR;
+        }
+        context->keycode = res;
+    } else {
+        context->key = arg;
+    }
     *read = get_optind()+1; // Plus one for the argument
     return 0;
 }
@@ -280,7 +298,7 @@ int parse_press_command(const char** input, struct PressCmdContext* context, int
 
 
 
-int parse_delay_command(const char** input, struct DelayCmdContext* context, int *read) {
+int parseDelayCommand(const char** input, struct DelayCmdContext* context, int *read) {
     set_optind(1);
     const char *arg;
     *context = DEFAULT_DELAY_CONTEXT;
@@ -310,7 +328,7 @@ int parse_delay_command(const char** input, struct DelayCmdContext* context, int
         fprintf(stderr, "Try 'vkey --help' for more information.\n");
         return -1;
     }
-    int res = parse_positive_int(arg);
+    int res = parsePositiveInt(arg);
     if (res < 0) {
         fprintf(stderr, "delay: subcommand argument <delay> must be positive integer value, found '%s'.\n", arg);
         fprintf(stderr, "Try 'vkey --help' for more information.\n");
@@ -324,7 +342,7 @@ int parse_delay_command(const char** input, struct DelayCmdContext* context, int
 }
 
 
-int parse_release_command(const char** input, struct ReleaseCmdContext* context, int *read) {
+int parseReleaseCommand(const char** input, struct ReleaseCmdContext* context, int *read) {
     set_optind(1);
     const char *arg;
     *context = DEFAULT_RELEASE_CONTEXT;
@@ -361,10 +379,9 @@ int parse_release_command(const char** input, struct ReleaseCmdContext* context,
 }
 
 
-enum CommandType parse_command(const char** input, union CmdContext* context, int *read) {
-    printf("Checking sub command %s.\n", input[0]);
+enum CommandType parseCommand(const char** input, union CmdContext* context, int *read) {
     if (strcmp((*input), "repeat") == 0) {
-        if (parse_repeat_command(input, &(context->repeat), read))
+        if (parseRepeatCommand(input, &(context->repeat), read))
             return CMD_UNKNOWN;
         return CMD_REPEAT;
 
@@ -373,20 +390,20 @@ enum CommandType parse_command(const char** input, union CmdContext* context, in
         return CMD_CLOSE_SERVER;
 
     } else if (strcmp(input[0], "type") == 0) {
-        if (parse_type_command(input, &(context->type), read))
+        if (parseTypeCommand(input, &(context->type), read))
             return CMD_UNKNOWN;
         return CMD_TYPE;
 
     } else if (strcmp(input[0], "press") == 0) {
-        if (parse_press_command(input, &(context->press), read))
+        if (parsePressCommand(input, &(context->press), read))
             return CMD_UNKNOWN;
         return CMD_PRESS;
     } else if (strcmp(input[0], "delay") == 0) {
-        if (parse_delay_command(input, &(context->delay), read))
+        if (parseDelayCommand(input, &(context->delay), read))
             return CMD_UNKNOWN;
         return CMD_DELAY;
     } else if (strcmp(input[0], "release") == 0) {
-        if (parse_release_command(input, &(context->release), read))
+        if (parseReleaseCommand(input, &(context->release), read))
             return CMD_UNKNOWN;
         return CMD_RELEASE;
     } else if (strcmp(input[0], "-h") == 0 || strcmp(input[0], "--help") == 0) {

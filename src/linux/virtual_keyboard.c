@@ -9,11 +9,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-
+#define MAX_KEYS 256
 
 struct KeyBoard {
-    int fd
+    u_int64_t pressKeys[(MAX_KEYS + 63) / 64];
+    int fd;
 };
+
+#define SET_BIT(A, K) ( A[K/64] |= ((u_int64_t)1 << (K%64)))
+#define CLEAR_BIT(A, K) ( A[K/64] &= ~((u_int64_t)1 << (K%64)))
 
 struct KeyBoard *createKeyBoard() {
     struct KeyBoard *kb = malloc(sizeof(struct KeyBoard));
@@ -85,6 +89,7 @@ enum Result pressKey(struct KeyBoard *keyboard, enum KeyCode key) {
 
     emit(keyboard->fd, EV_KEY, key, 1);
     emit(keyboard->fd, EV_SYN, SYN_REPORT, 0);
+    SET_BIT(keyboard->pressKeys, key);
 
     return Success;
 }
@@ -93,6 +98,7 @@ enum Result releaseKey(struct KeyBoard *keyboard, enum KeyCode key) {
 
     emit(keyboard->fd, EV_KEY, key, 0);
     emit(keyboard->fd, EV_SYN, SYN_REPORT, 0);
+    CLEAR_BIT(keyboard->pressKeys, key);
 
     return Success;
 }
@@ -103,6 +109,9 @@ enum Result tapKey(struct KeyBoard *keyboard, enum KeyCode key) {
     emit(keyboard->fd, EV_SYN, SYN_REPORT, 0);
     emit(keyboard->fd, EV_KEY, key, 0);
     emit(keyboard->fd, EV_SYN, SYN_REPORT, 0);
+
+    // Turn of key, as tapping it will leave it off even if pressed before tapping
+    CLEAR_BIT(keyboard->pressKeys, key);
 
     return Success;
 }
@@ -162,4 +171,16 @@ enum Result typeString(struct KeyBoard *keyboard, const char* str, unsigned int 
         releaseKey(keyboard, K_Shift);
 
     return Success;
+}
+
+void releaseAllKeys(struct KeyBoard *keyboard) {
+    for (unsigned int i = 0; i < MAX_KEYS / 64; i++) {
+        if (keyboard->pressKeys[i] == 0)
+            continue;
+        for (u_int64_t j = 0; j < 64; j++) {
+            if (keyboard->pressKeys[i] & ((u_int64_t)1 << j)) {
+                releaseKey(keyboard, i*64 + j);
+            }
+        }
+    }
 }

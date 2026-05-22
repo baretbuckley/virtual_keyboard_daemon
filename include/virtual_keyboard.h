@@ -34,4 +34,6 @@ enum Result tapKey(struct KeyBoard *keyboard, enum KeyCode key);
 
 enum Result typeString(struct KeyBoard *keyboard, const char* str, unsigned int delay);
 
+void releaseAllKeys(struct KeyBoard *keyboard);
+
 #endif

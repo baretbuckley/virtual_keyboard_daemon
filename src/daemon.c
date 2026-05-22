@@ -129,6 +129,7 @@ int main() {
                     
                 }
             }
+            releaseAllKeys(keyboard);
 
             printf("serial message length: %i\n", msgRef->msgLen);
             printSerialMsg(*msgRef);

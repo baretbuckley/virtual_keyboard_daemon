@@ -1,7 +1,7 @@
 #include <fcntl.h>
 #include <linux/input.h>
 
-#include "print-keys.c"
+#include "print_keys.c"
 #include "key_reader.c"
 
 #include <string.h>

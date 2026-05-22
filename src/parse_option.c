@@ -26,11 +26,9 @@ int parse_arg(const char **argv, const char **optarg) {
 
 int parse_opt_long(const char **argv, const struct Option *options, unsigned int numOptions, const char **optarg) {
     for (unsigned int i = 0; i < numOptions; i++) {
-        printf("%s, %s\n", options[i].longName, (argv[optind]+2));
         if (!strncmp(options[i].longName, (argv[optind]+2), options[i].longNameLen)) {
             switch (argv[optind][options[i].longNameLen+2]) {
                 case '\0':
-                    printf("Found1 %s\n", &(argv[optind][options[i].longNameLen]));
                     if (!options[i].hasArg)
                         return i;
                     
@@ -42,15 +40,12 @@ int parse_opt_long(const char **argv, const struct Option *options, unsigned int
                         return ret;
                     }
                 case '=':
-                    printf("Found2 %s\n", &(argv[optind][options[i].longNameLen]));
                     if (!options[i].hasArg)
                         return UNEXPECTED_OPTION_ARG;
                     
                     *optarg = &(argv[optind][options[i].longNameLen+3]); // arg is rest of string after '=' 
-                    printf("arg is %s\n", *optarg);
                     return i;
                 default:
-                    printf("Found3 %s\n", &(argv[optind][options[i].longNameLen+2]));
                     break;
             }
         }
@@ -108,7 +103,7 @@ int parse_opt_short(const char **argv, const struct Option *options, unsigned in
 //             printf("'%s' flag is repeated.", input[errorIdx]);
 //             break;
 
-enum OptionParseReturn processOptionError(const char **argv, enum OptionParseError error) {
+enum OptionParseReturn process_option_error(const char **argv, enum OptionParseError error) {
     switch (error) {
         case NOT_AN_OPTION:
             return OPT_PARSE_NOT_AN_OPT;
@@ -150,7 +145,7 @@ int parse_opt(const char **argv, const struct Option *options, unsigned int numO
         optind += 1;
         return res;
     } else {
-        return processOptionError(argv, res);
+        return process_option_error(argv, res);
     }
 }
 

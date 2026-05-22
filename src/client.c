@@ -1,6 +1,6 @@
 #include <channel.h>
 #include <message.h>
-#include <commands.h>
+#include <client_options.h>
 
 #include <stdio.h>
 // #include <windows.h>
@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
         printf("Total read: %i\n", totalRead);
 
         // Build msg object from command line arguments
-        switch (parse_command((const char**)(argv + totalRead), &context, &read)) {
+        switch (parseCommand((const char**)(argv + totalRead), &context, &read)) {
             case CMD_TYPE:
                 if (context.type.message == NULL) {
                     printf("Null message found\n");
@@ -43,12 +43,18 @@ int main(int argc, char** argv) {
 
                 break;
             case CMD_PRESS:
-                printf("Found subcommand 'press', hold? = %i, hold-for = %i, key = '%s'\n", context.press.hold, context.press.press_delay_ms, context.press.key);
-                key = keycodeFromString(context.press.key);
-                if (key == K_UNKNOWN) {
-                    printf("Unknown key '%s'", context.press.key);
-                    break;
+                if (context.press.byKeycode) {
+                    printf("Found subcommand 'press', hold? = %i, hold-for = %i, keycode = %i\n", context.press.hold, context.press.press_delay_ms, context.press.keycode);
+                    key = context.press.keycode;
+                } else {
+                    printf("Found subcommand 'press', hold? = %i, hold-for = %i, key = '%s'\n", context.press.hold, context.press.press_delay_ms, context.press.key);
+                    key = keycodeFromString(context.press.key);
+                    if (key == K_UNKNOWN) {
+                        printf("Unknown key '%s'", context.press.key);
+                        break;
+                    }
                 }
+                printf("Have keycode now\n");
                 if (context.press.hold) {
                     if (context.press.press_delay_ms) {
                         fprintf(stderr, "The press command does not allow the use of the --hold and --hold-for flag at the same time\nrun 'vkey --help' for usage");

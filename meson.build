@@ -6,16 +6,32 @@ project('input_device_daemon', 'c',
 incdir = include_directories('include')
 
 
+
+# files shared between both client and daemon (not tool)
+shared_src = ['src/message.c']
+
+client_src = ['src/client_options.c', 'src/keycode_from_str.c', 'src/parse_option.c']
+
+daemon_src = []
+
+tool_src = []
+
+
 if build_machine.system() == 'windows'
-  os_src = ['src/windows/channel.c', 'src/windows/virtual_keyboard.c', 'src/windows/keycode.c']
+  shared_src += ['src/windows/channel.c', 'src/windows/keycode.c']
+  daemon_src += ['src/windows/virtual_keyboard.c']
+  
+
 elif build_machine.system() == 'linux'
-  os_src = ['src/linux/channel.c', 'src/linux/virtual_keyboard.c', 'src/linux/keycode.c']
+  shared_src += ['src/linux/channel.c', 'src/linux/keycode.c']
+  daemon_src += ['src/linux/virtual_keyboard.c']
+  tool_src += ['src/linux/keycode.c']
 endif
-src_files = ['src/message.c']
+# src_files = ['src/message.c']
 
-client_src = ['src/client.c', 'src/commands.c', 'src/keycodeFromStr.c', 'src/parse_option.c']
+# client_src = ['src/client.c', 'src/commands.c', 'src/keycodeFromStr.c', 'src/parse_option.c']
 
-tool_src = ['src/linux/keycode.c']
+# tool_src = ['src/linux/keycode.c']
 
 # executable('demo',
 #            ['src/main.c'] + src_files + os_src,
@@ -23,12 +39,12 @@ tool_src = ['src/linux/keycode.c']
 #            install : true)
 
 executable('vkeyd',
-           ['src/daemon.c'] + src_files + os_src,
+           ['src/daemon.c'] + shared_src + daemon_src,
            include_directories : incdir,
            install : true)
 
 executable('vkey',
-           client_src + src_files + os_src,
+           ['src/client.c'] + client_src + shared_src,
            include_directories : incdir,
            install : true)
 
