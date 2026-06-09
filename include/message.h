@@ -68,6 +68,8 @@ void clearRetainingCapacity(struct SerialMessage *smsg);
 // Clears Serial Object and frees internal buffer
 void clearAndFree(struct SerialMessage *smsg);
 
+// Get length of serial message not including the reserved 4 byte prefix
+unsigned int serialMsgLen(struct SerialMessage smsg);
 
 // non dynamic appends to serial message
 
@@ -91,6 +93,14 @@ int serialMsgAppend(struct SerialMessage *smsg, struct Message other);
 // Appends serial messages. copies others internal buffer to smsg
 // Returns -1 if buffer is ot of space
 int serialMsgAppendSerial(struct SerialMessage *smsg, struct SerialMessage other);
+
+// Apend M_Type message with a specified str length rather than null-terminated
+// Returns -1 if the buffer is out of space
+int serialMsgAppendTypeN(struct SerialMessage *smsg, const char* msgStr, unsigned int strLen);
+
+// Apend M_TypeDelay message with a specified str length rather than null-terminated
+// Returns -1 if the buffer is out of space
+int serialMsgAppendTypeDelayN(struct SerialMessage *smsg, const char* msgStr, unsigned int delay, unsigned int strLen);
 
 
 // dynamic memory appending to serial message

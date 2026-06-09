@@ -118,9 +118,9 @@ void clearAndFree(struct SerialMessage *smsg) {
     smsg->msgLen = 0;
 }
 
-unsigned int serialFullLen(struct SerialMessage smsg) {
+unsigned int serialMsgLen(struct SerialMessage smsg) {
     if (smsg.msgBuffer == NULL) return 0;
-    return smsg.msgLen;
+    return smsg.msgLen-4;
 }
 
 
@@ -142,8 +142,8 @@ void appendType(struct SerialMessage *smsg, enum MessageType type) {
 }
 
 void appendStr(struct SerialMessage *smsg, const char *str, unsigned int strLen) {
-    memcpy(smsg->msgBuffer+smsg->msgLen, str, strLen+1);
-    smsg->msgLen += strLen+1;
+    memcpy(smsg->msgBuffer+smsg->msgLen, str, strLen);
+    smsg->msgLen += strLen;
 }
 
 void appendKeycode(struct SerialMessage *smsg, enum KeyCode key) {
@@ -163,7 +163,7 @@ int serialMsgAppendWorker(struct SerialMessage *smsg, struct Message other, unsi
     switch (other.type) {
         case M_Type:
             // <Type> <string>
-            stringLen = strlen(other.msg.str);
+            stringLen = strlen(other.msg.str)+1;
             msgSize = 4+stringLen+1; // Msg type + strlen + null-terminal 
             if (assertLen(smsg, msgSize, isDynamic)) return -1;
             appendType(smsg, other.type);
@@ -207,6 +207,7 @@ int serialMsgAppendWorker(struct SerialMessage *smsg, struct Message other, unsi
             msgSize = 12; // Msg type + count + delay 
             if (assertLen(smsg, msgSize, isDynamic)) return -1;
             appendType(smsg, other.type);
+            appendU32(smsg, other.msg.count);
             appendU32(smsg, other.delay);
             break;
         case M_ServerClose:
@@ -254,6 +255,25 @@ void dynamicSerialMsgAppendSerial(struct SerialMessage *smsg, struct SerialMessa
     //                                                    v accounting for prefix space
     memcpy(smsg->msgBuffer + smsg->msgLen, other.msgBuffer+4, other.msgLen-4);
     smsg->msgLen += other.msgLen;
+}
+
+
+int serialMsgAppendTypeN(struct SerialMessage *smsg, const char *msgStr, unsigned int strLen) {
+    if (smsg->capacity - smsg->msgLen < (5 + strLen + 1)) return -1;
+    appendType(smsg, M_Type);
+    appendStr(smsg, msgStr, strLen);
+    smsg->msgBuffer[smsg->msgLen] = 0; // Null terminate string
+    smsg->msgLen += 1;
+    return 0;
+}
+
+int serialMsgAppendTypeDelayN(struct SerialMessage *smsg, const char* msgStr, unsigned int delay, unsigned int strLen) {
+    if (smsg->capacity - smsg->msgLen < (8 + strLen + 1)) return -1;
+    appendType(smsg, M_TypeDelay);
+    appendU32(smsg, delay);
+    appendStr(smsg, msgStr, strLen);
+    smsg->msgBuffer[smsg->msgLen++] = 0; // Null terminate string
+    return 0;
 }
 
 

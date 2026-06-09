@@ -24,9 +24,9 @@ struct ServerChannel {
     unsigned char connected;
 };
 
+#define DEFAULT_PATH_PREFIX "/tmp/"
 
-
-int open_af_unix_socket(struct sockaddr_un *address, const char* name) {
+int open_af_unix_socket(struct sockaddr_un *address) {
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if(fd == -1) {
         fprintf(stderr, "Failed to open AF_UNIX socket: %s\n", strerror(errno));
@@ -36,15 +36,34 @@ int open_af_unix_socket(struct sockaddr_un *address, const char* name) {
         return fd;
     }
     address->sun_family = AF_UNIX;
-    strcpy(address->sun_path, "/tmp/");
-    strcpy(address->sun_path+(sizeof("/tmp/")-1), name);
-    printf("name: %s, path: %s\n", name, address->sun_path);
+    printf("path: %s\n", address->sun_path);
     return fd;
 }
 
 struct ServerChannel *createChannel(const char *name) {
     struct ServerChannel *channel = (struct ServerChannel *)malloc(sizeof(struct ServerChannel));
-    channel->fd = open_af_unix_socket(&(channel->address), name);
+    strcpy(channel->address.sun_path, DEFAULT_PATH_PREFIX);
+    strcpy(channel->address.sun_path + (sizeof(DEFAULT_PATH_PREFIX)-1), name);
+    
+    channel->fd = open_af_unix_socket(&(channel->address));
+    
+    if (bind(channel->fd, (struct sockaddr *)&(channel->address), sizeof(struct sockaddr))) {
+        fprintf(stderr, "Failed to bind socket on Path=%s, Error: %s\n", channel->address.sun_path, strerror(errno));
+        return NULL;
+    }
+    if (listen(channel->fd, 10)) {
+        fprintf(stderr, "Error while accepting connection: %s\n", strerror(errno));
+        return NULL;
+    }
+    channel->msgBuffer = initSerialMsgCapacity(CHANNEL_BUFFER_SIZE);
+    channel->connected = 0;
+    return channel;
+}
+
+struct ServerChannel *createChannelWithPath(const char *path) {
+    struct ServerChannel *channel = (struct ServerChannel *)malloc(sizeof(struct ServerChannel));
+    strcpy(channel->address.sun_path, path);
+    channel->fd = open_af_unix_socket(&(channel->address));
     
     if (bind(channel->fd, (struct sockaddr *)&(channel->address), sizeof(struct sockaddr))) {
         fprintf(stderr, "Failed to bind socket on Path=%s, Error: %s\n", channel->address.sun_path, strerror(errno));
@@ -135,7 +154,23 @@ void freeServerChannel(struct ServerChannel *channel) {
 
 struct ClientChannel *openChannel(const char *name) {
     struct ClientChannel *channel = (struct ClientChannel *)malloc(sizeof(struct ServerChannel));
-    channel->fd = open_af_unix_socket(&(channel->address), name);
+    strcpy(channel->address.sun_path, DEFAULT_PATH_PREFIX);
+    strcpy(channel->address.sun_path + (sizeof(DEFAULT_PATH_PREFIX)-1), name);
+    channel->fd = open_af_unix_socket(&(channel->address));
+
+    if (connect(channel->fd, (struct sockaddr *)&(channel->address), sizeof(struct sockaddr))) {
+        fprintf(stderr, "Failed to connect to socket on Path=%s, Error: %s\n", channel->address.sun_path, strerror(errno));
+        disconnect(channel);
+        return NULL;
+    }
+    channel->connected = 1;
+    return channel;
+}
+
+struct ClientChannel *openChannelWithPath(const char *path) {
+    struct ClientChannel *channel = (struct ClientChannel *)malloc(sizeof(struct ServerChannel));
+    strcpy(channel->address.sun_path, path);
+    channel->fd = open_af_unix_socket(&(channel->address));
 
     if (connect(channel->fd, (struct sockaddr *)&(channel->address), sizeof(struct sockaddr))) {
         fprintf(stderr, "Failed to connect to socket on Path=%s, Error: %s\n", channel->address.sun_path, strerror(errno));

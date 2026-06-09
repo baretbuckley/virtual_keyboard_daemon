@@ -12,7 +12,7 @@ shared_src = ['src/message.c']
 
 client_src = ['src/client_options.c', 'src/keycode_from_str.c', 'src/parse_option.c']
 
-daemon_src = []
+daemon_src = ['src/daemon_options.c', 'src/parse_option.c']
 
 tool_src = []
 

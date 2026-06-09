@@ -20,7 +20,7 @@ const char* REPEAT_USAGE =
 "  <count>                      Number of times to repeat the next command\n";
 
 const char *CLOSE_SERVER_USAGE = 
-"\nclose_server               Send message requesting the target server to close.\n"
+"\nclose-server               Send message requesting the target server to close.\n"
 "  (no further options)\n";
 
 const char *TYPE_USAGE = 
@@ -67,19 +67,19 @@ int parsePositiveInt(const char *valueStr) {
 
 
 void printSubCommandUsage(const char *usage) {
-    puts(usage);
+    printf("%s", usage);
     printf("Run 'vkey --help' for full help message");
 }
 
 
 void printFullUsage() {
-    puts(FULL_USAGE);
-    puts(TYPE_USAGE);
-    puts(PRESS_USAGE);
-    puts(RELEASE_USAGE);
-    puts(CLOSE_SERVER_USAGE);
-    puts(REPEAT_USAGE);
-    puts(DELAY_USAGE);
+    printf("%s", FULL_USAGE);
+    printf("%s", TYPE_USAGE);
+    printf("%s", PRESS_USAGE);
+    printf("%s", RELEASE_USAGE);
+    printf("%s", CLOSE_SERVER_USAGE);
+    printf("%s", REPEAT_USAGE);
+    printf("%s", DELAY_USAGE);
 }
 
 void reportRepeatedOption(const char **argv) {
@@ -303,6 +303,7 @@ int parseDelayCommand(const char** input, struct DelayCmdContext* context, int *
     const char *arg;
     *context = DEFAULT_DELAY_CONTEXT;
     // Just parsing to handle --help option
+    // and detect any unexpected flags
     while (1) {
         int res = parse_opt(input, NULL, 0, &arg);
         switch (res) {
@@ -412,4 +413,54 @@ enum CommandType parseCommand(const char** input, union CmdContext* context, int
     } else {
         return CMD_UNKNOWN;
     }
+}
+
+
+
+
+static const struct Option CLIENT_OPTIONS[] = {
+    {"channel-name", sizeof("channel-name")-1, 'c', 1},
+    {"linux-channel-path", sizeof("linux-channel-path")-1, '\0', 1},
+};
+int parseClientOptions(const char **input, struct ClientOptContext *context, int *read) {
+    unsigned int set_members = 0;
+    enum MemberFlags {
+        CHANNEL_NAME_SET = 1 << 0,
+        LINUX_CHANNEL_NAME_SET = 1 << 1,
+    };
+    set_optind(1);
+    const char *arg = NULL;
+    *context = DEFAULT_CLIENT_CONTEXT;
+    while (1) {
+        int res = parse_opt(input, CLIENT_OPTIONS, NUM_OPTIONS(CLIENT_OPTIONS), &arg);
+        switch (res) {
+            case 0: // channel-name
+                ASSERT_NON_REPEAT(CHANNEL_NAME_SET, set_members)
+                context->channelName = arg;
+                break;
+
+            case 1: // linux-channel-path
+                ASSERT_NON_REPEAT(LINUX_CHANNEL_NAME_SET, set_members)
+                context->channelPath = arg;
+                break;
+
+            case OPT_PARSE_NOT_AN_OPT:
+            case OPT_PARSE_END_OF_ARGS:
+                goto break_opt_loop;
+
+            case OPT_PARSE_ERROR:
+                return -1;
+
+            case OPT_PARSE_HELP:
+                printFullUsage();
+                return -1;
+            default:
+                fprintf(stderr, "Unrecognized return in parsing opt: %i\n", res);
+        }
+    }
+    break_opt_loop:
+
+
+    *read = get_optind();
+    return 0;
 }

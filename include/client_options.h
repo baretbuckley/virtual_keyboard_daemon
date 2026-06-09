@@ -1,10 +1,9 @@
-#ifndef COMMANDS_H
-#define COMMANDS_H
-
-// TMP
-// #include <string>
+#ifndef CLIENTOPTIONS_H
+#define CLIENTOPTIONS_H
 
 #include "keycode.h"
+
+#include <stddef.h>
 
 
 enum CommandType {
@@ -74,13 +73,27 @@ enum CommandParseResult {
 // enum CommandParseResult parse_repeat_command(const char** input, struct RepeatCmdContext* context, int *read);
 
 
+// Parse subcommand options and argument, (i.e. press, type, repeat, delay, and release)
+// Options must be in format <Command Name> [Options]... [arg]
 enum CommandType parseCommand(const char** input, union CmdContext* context, int *read);
 
 
 
+struct ClientOptContext {
+    // channel name is extension of a base path dependant on OS
+    const char *channelName;
+    // channel path is a complete path used for channel location, only available on linux
+    const char *channelPath;
+};
+static struct ClientOptContext DEFAULT_CLIENT_CONTEXT = {NULL, NULL};
+
+
+// Parse client options
+// --channel-name <string> -> context->channel-name
+// --linux-channel-path <path> -> context->channel-path
+int parseClientOptions(const char **input, struct ClientOptContext *context, int *read);
 
 
 
-
-#endif // COMMANDS_H
+#endif // CLIENTOPTIONS_H
 

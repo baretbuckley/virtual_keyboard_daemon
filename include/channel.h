@@ -15,6 +15,10 @@ struct ServerChannel;
 
 struct ServerChannel *createChannel(const char *name);
 
+#ifdef __linux__
+struct ServerChannel *createChannelWithPath(const char *path);
+#endif
+
 void closeChannel(struct ServerChannel *channel);
 
 int waitConnection(struct ServerChannel *channel);
@@ -30,6 +34,10 @@ void freeServerChannel(struct ServerChannel *channel);
 // Client Side API
 
 struct ClientChannel *openChannel(const char *name);
+
+#ifdef __linux__
+struct ClientChannel *openChannelWithPath(const char *path);
+#endif
 
 void disconnect(struct ClientChannel *channel);
 
