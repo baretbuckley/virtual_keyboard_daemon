@@ -100,8 +100,8 @@ enum KeyCode {
     K_Scroll              = SELECT_KEY( BTN_MIDDLE,                 0 ), // TODO: IDK what the key is supposed to be doing
     K_ScrollUp            = SELECT_KEY( KEY_SCROLLUP,               0 ),
     K_ScrollDown          = SELECT_KEY( KEY_SCROLLDOWN,             0 ),
-    K_LeftMouse           = SELECT_KEY( KEY_LEFT,                   0 ),
-    K_RightMouse          = SELECT_KEY( KEY_RIGHT,                  0 ),
+    K_LeftMouse           = SELECT_KEY( BTN_LEFT,                   0 ),
+    K_RightMouse          = SELECT_KEY( BTN_RIGHT,                  0 ),
 
 
     K_Numpad0             = SELECT_KEY( KEY_NUMERIC_0,              0 ),

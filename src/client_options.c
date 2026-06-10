@@ -10,7 +10,9 @@
 // Comand usages ------------------------------------------
 
 const char *FULL_USAGE =
-"\nUsage: vkey [-c|--channel-name <name>] [Subcommands]...\n"
+"\nUsage: vkey [options] [Subcommands]...\n"
+"  -c, --channel-name <name>     Specify the name of the channel when communicating with the server"
+"  --linux-channel-path <path>   (linux only) specify the path of the "
 "Subcommands:\n";
 
 const char* REPEAT_USAGE =
