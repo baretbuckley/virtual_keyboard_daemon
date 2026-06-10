@@ -12,7 +12,8 @@ enum CommandType {
     CMD_TYPE = 3,
     CMD_PRESS = 4,
     CMD_DELAY = 5,
-    CMD_RELEASE = 6,
+    CMD_HOLD = 6,
+    CMD_RELEASE = 7,
     FLAG_HELP = -2, // help flag is returned in place of comand when encountered
     CMD_UNKNOWN = 0,
 };
@@ -33,6 +34,13 @@ struct TypeCmdContext {
 static struct TypeCmdContext default_type_context = {"", 0};
 
 
+#define PRESS_CMD_GET_SHIFT(SPECIAL_KEYS) SPECIAL_KEYS & (1 << 0)
+#define PRESS_CMD_GET_CTRL(SPECIAL_KEYS) SPECIAL_KEYS & (1 << 1)
+#define PRESS_CMD_GET_ALT(SPECIAL_KEYS) SPECIAL_KEYS & (1 << 2)
+#define PRESS_CMD_SET_SHIFT(SPECIAL_KEYS) SPECIAL_KEYS |= (1 << 0);
+#define PRESS_CMD_SET_CTRL(SPECIAL_KEYS) SPECIAL_KEYS |= (1 << 1);
+#define PRESS_CMD_SET_ALT(SPECIAL_KEYS) SPECIAL_KEYS |= (1 << 2);
+
 struct PressCmdContext {
     union {
         const char *key;
@@ -41,8 +49,9 @@ struct PressCmdContext {
     unsigned int press_delay_ms;
     unsigned char hold;
     unsigned char byKeycode;
+    unsigned char specialKeys; // added keys pressed with the target key, order is 0b X X X X X <alt> <ctrl> <shift>
 };
-static struct PressCmdContext default_press_context = {"", 0, 0, 0};
+static struct PressCmdContext default_press_context = {"", 0, 0, 0, 0};
 
 
 struct DelayCmdContext {
@@ -50,6 +59,14 @@ struct DelayCmdContext {
 };
 static struct DelayCmdContext DEFAULT_DELAY_CONTEXT = {0};
 
+struct HoldCmdContext {
+    union {
+        const char *key;
+        unsigned int keycode;
+    };
+    unsigned char byKeycode;
+};
+static struct HoldCmdContext DEFAULT_HOLD_CONTEXT = {"", 0};
 
 struct ReleaseCmdContext {
     const char *key;
@@ -61,6 +78,7 @@ union CmdContext {
     struct PressCmdContext press;
     struct RepeatCmdContext repeat;
     struct DelayCmdContext delay;
+    struct HoldCmdContext hold;
     struct ReleaseCmdContext release;
 };
 

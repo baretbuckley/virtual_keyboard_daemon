@@ -30,13 +30,21 @@ const char *TYPE_USAGE =
 "  <string>                     String to type\n";
 
 const char *PRESS_USAGE =
-"\npress                      Repeat the following command a specified number of times.\n"
-"  --help                       Show help message for the 'press' subcommand\n"
-"  -h, --hold                   Holds the key without releasing (use the release command to release the key)\n"
-"                                   any keys still held at the end of the command will be released\n"
-"  -k --keycode                 Specify the key by it's keycode, exact values are determined by the operating system\n"
+"\npress                      Press and release a specified key.\n"
+"  -h --help                    Show help message for the 'press' subcommand\n"
+"  -k --keycode                 Specify the key by it's keycode number, exact values are determined by the operating system\n"
 "  --hold-for <ms>              delay between pressing and releasing the key (not compatable with using --hold)\n"
+"  -s --shift                   press shift for the duration that the target key is being pressed\n"
+"  -c --ctrl                    press ctrl for the duration that the target key is being pressed\n"
+"  -a --alt                     press alt for the duration that the target key is being pressed\n"
 "  <key>                        the key to press\n";
+
+const char *HOLD_USAGE =
+"\nhold                       Holds the specified key without releasing, use the release command to release the key.\n"
+"                                   (Any keys still held at the end of the command will be released)\n"
+"  -h, --help                   Show help message for the 'hold' subcommand\n"
+"  -k --keycode                 Specify the key by it's keycode number, exact values are determined by the operating system\n"
+"  <key>                        The key to hold\n";
 
 const char *DELAY_USAGE =
 "\ndelay                      Delay the execution of all following commands.\n"
@@ -76,6 +84,7 @@ void printFullUsage() {
     printf("%s", FULL_USAGE);
     printf("%s", TYPE_USAGE);
     printf("%s", PRESS_USAGE);
+    printf("%s", HOLD_USAGE);
     printf("%s", RELEASE_USAGE);
     printf("%s", CLOSE_SERVER_USAGE);
     printf("%s", REPEAT_USAGE);
@@ -230,16 +239,20 @@ int parseTypeCommand(const char** input, struct TypeCmdContext* context, int *re
 
 
 static const struct Option PRESS_OPTIONS[] = {
-    {"hold", sizeof("hold")-1, 'h', 0},
     {"hold-for", sizeof("hold-for")-1, '\0', 1},
-    {"keycode", sizeof("keycode")-1, 'k', 0}
+    {"keycode", sizeof("keycode")-1, 'k', 0},
+    {"shift", sizeof("shift")-1, 's', 0},
+    {"ctrl", sizeof("ctrl")-1, 'c', 0},
+    {"alt", sizeof("alt")-1, 'a', 0}
 };
 int parsePressCommand(const char** input, struct PressCmdContext* context, int *read) {
     unsigned int set_members = 0;
     enum MemberFlags {
-        HOLD_SET = 1 << 0,
         HOLD_FOR_SET = 1 << 1,
         KEYCODE_SET = 1 << 2,
+        SHIFT_SET = 1 << 3,
+        CTRL_SET = 1 << 4,
+        ALT_SET = 1 << 5,
     };
     set_optind(1);
     *context = default_press_context;
@@ -247,19 +260,30 @@ int parsePressCommand(const char** input, struct PressCmdContext* context, int *
     while (1) {
         int res = parse_opt(input, PRESS_OPTIONS, NUM_OPTIONS(PRESS_OPTIONS), &arg);
         switch (res) {
-            case 0: // hold
-                ASSERT_NON_REPEAT(HOLD_SET, set_members)
-                context->hold = 1;
-                break;
 
-            case 1: // hold-for
+            case 0: // hold-for
                 ASSERT_NON_REPEAT(HOLD_FOR_SET, set_members)
                 READ_UNSIGNED_INT_ARG(arg, context->press_delay_ms)
                 break;
             
-            case 2: // keycode
+            case 1: // keycode
                 ASSERT_NON_REPEAT(KEYCODE_SET, set_members)
                 context->byKeycode = 1;
+                break;
+            
+            case 2: // shift
+                ASSERT_NON_REPEAT(SHIFT_SET, set_members)
+                PRESS_CMD_SET_SHIFT(context->specialKeys)
+                break;
+
+            case 3: // ctrl
+                ASSERT_NON_REPEAT(CTRL_SET, set_members)
+                PRESS_CMD_SET_CTRL(context->specialKeys)
+                break;
+
+            case 4: // alt
+                ASSERT_NON_REPEAT(ALT_SET, set_members)
+                PRESS_CMD_SET_ALT(context->specialKeys)
                 break;
 
             case OPT_PARSE_NOT_AN_OPT:
@@ -342,6 +366,53 @@ int parseDelayCommand(const char** input, struct DelayCmdContext* context, int *
     return 0;
 }
 
+static const struct Option HOLD_OPTIONS[] = {
+    {"keycode", sizeof("keycode")-1, 'k', 1},
+};
+int parseHoldCommand(const char** input, struct HoldCmdContext* context, int *read) {
+    unsigned int set_members = 0;
+    enum MemberFlags {
+        KEYCODE_SET = 1 << 0,
+    };
+    set_optind(1);
+    const char *arg;
+    *context = DEFAULT_HOLD_CONTEXT;
+    // Just parsing to handle --help option
+    while (1) {
+        int res = parse_opt(input, HOLD_OPTIONS, NUM_OPTIONS(HOLD_OPTIONS), &arg);
+        switch (res) {
+            case 1: // keycode
+                ASSERT_NON_REPEAT(KEYCODE_SET, set_members)
+                context->byKeycode = 1;
+                break;
+
+            case OPT_PARSE_NOT_AN_OPT:
+            case OPT_PARSE_END_OF_ARGS:
+                goto break_opt_loop;
+
+            case OPT_PARSE_ERROR:
+                return -1;
+
+            case OPT_PARSE_HELP:
+                printSubCommandUsage(HOLD_USAGE);
+                return -1;
+            default:
+                fprintf(stderr, "Unrecognized return in parsing opt: %i\n", res);
+        }
+    }
+    break_opt_loop:
+
+
+    if (parse_arg(input, &arg)) {
+        fprintf(stderr, "hold: missing subcommand argument <key>.\n");
+        fprintf(stderr, "Try 'vkey --help' for more information.\n");
+        return -1;
+    }
+    context->key = arg;
+
+    *read = get_optind() + 1;
+    return 0;
+}
 
 int parseReleaseCommand(const char** input, struct ReleaseCmdContext* context, int *read) {
     set_optind(1);
@@ -403,6 +474,10 @@ enum CommandType parseCommand(const char** input, union CmdContext* context, int
         if (parseDelayCommand(input, &(context->delay), read))
             return CMD_UNKNOWN;
         return CMD_DELAY;
+    } else if (strcmp(input[0], "hold") == 0) {
+        if (parseHoldCommand(input, &(context->hold), read))
+            return CMD_UNKNOWN;
+        return CMD_HOLD;
     } else if (strcmp(input[0], "release") == 0) {
         if (parseReleaseCommand(input, &(context->release), read))
             return CMD_UNKNOWN;
