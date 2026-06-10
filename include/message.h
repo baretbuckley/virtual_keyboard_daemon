@@ -17,15 +17,15 @@ enum MessageType {
     M_ServerClose = 0x09,   // Close server
 };
 
-// Serializes sequence of message to be <4 byte space> (<msg code>[msg value])*
-// 4 byte space is reserved to use msg len prefix in inter process communication,
-// it is undefined for any reference outside of that usecase
+// Serializes sequence of messages as a byte stream
 struct SerialMessage {
     unsigned char *msgBuffer;
-    unsigned int msgLen; // Includes NULL prefix
+    unsigned int msgLen;
     unsigned int capacity;
 };
 
+// Object wrapping around a serial message reference allowing messages
+// to be deserialized
 struct SerialExtractor {
     struct SerialMessage *smsg;
     unsigned int pos;
@@ -57,6 +57,7 @@ struct SerialMessage initSerialMsgCapacity(unsigned int capacity);
 // Constructs Serial Message using given buffer with capacity
 // object takes ownership of buffer and may reallocate as needed
 struct SerialMessage initSerialMsgFrom(unsigned char *buffer, unsigned int capacity);
+
 
 // Deinits serial message, clearing internal buffer as needed
 void deinitSerialMsg(struct SerialMessage *smsg);
@@ -104,19 +105,6 @@ int serialMsgAppendTypeDelayN(struct SerialMessage *smsg, const char* msgStr, un
 
 
 // dynamic memory appending to serial message
-
-// // Appends server close signal to the serial message
-// // Dynamically grows internal buffer as need
-// void dynamicSerialMsgAppendServerClose(struct SerialMessage *smsg);
-
-// // Appends string to the serial message
-// // given string is copied to internal buffer
-// // Dynamically grows internal buffer as need
-// void dynamicSerialMsgAppendString(struct SerialMessage *smsg, const char* str);
-
-// // Appends key message to the serial message
-// // Dynamically grows internal buffer as need
-// void dynamicSerialMsgAppendKey(struct SerialMessage *smsg, enum KeyCode key);
 
 // Appends given message to the serial message object
 // Dynamically grows internal buffer as need

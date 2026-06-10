@@ -141,7 +141,7 @@ int main(int argc, const char **argv) {
 
     signal(SIGINT, sig_int_close);
 
-    struct SerialMessage *msgRef;
+    struct SerialMessage msgRef;
 
 
     keyboard = createKeyBoard();
@@ -151,6 +151,8 @@ int main(int argc, const char **argv) {
         return -1;
     }
 
+    unsigned char msgBuffer[CHANNEL_BUFFER_SIZE];
+
     // Construct channel based on result of client options
     // channelPath (on linux) ->     <channelPath>
     // channelName ->                <DEFAULT PREFIX>/<channelName>
@@ -159,16 +161,16 @@ int main(int argc, const char **argv) {
 #ifdef __linux__
     if (context.channelPath != 0) {
         printf("Using channel path\n");
-        channel = createChannelWithPath(context.channelPath);
+        channel = createChannelWithPath(context.channelPath, msgBuffer, CHANNEL_BUFFER_SIZE);
     }
     else
 #endif
     if (context.channelName != 0) {
         printf("Using channel name\n");
-        channel = createChannel(context.channelName);
+        channel = createChannel(context.channelName, msgBuffer, CHANNEL_BUFFER_SIZE);
     } else {
         printf("Using default name\n");
-        channel = createChannel("vkeyd");
+        channel = createChannel("vkeyd", msgBuffer, CHANNEL_BUFFER_SIZE);
     }
 
 
@@ -192,17 +194,16 @@ int main(int argc, const char **argv) {
         // If recieved "exit" shut down server
         while (isClientConnected(channel)) {
             printf("Recieving message\n");
-            msgRef = recieveMessage(channel);
-            printf("reading message\n");
-            // bytesRead = recieveMessage(channel, buffer, BUFFER_SIZE);
             
-            if (msgRef == NULL) {
+            if (recieveMessage(channel, &msgRef) < 0) {
                 printf("Failed to read from pipe.");
                 cleanUp();
                 return -1;
             }
-            struct SerialExtractor extractor = serialExtractor(msgRef);
-            struct Message msg;
+            if (msgRef.msgLen == 0) {
+                continue;
+            }
+            struct SerialExtractor extractor = serialExtractor(&msgRef);
             int res;
             while ((res = executeMsg(&extractor)) == ER_Success);
             switch (res) {
@@ -217,53 +218,11 @@ int main(int argc, const char **argv) {
                     printf("Illformated message recieved\n");
                     break;
             }
-            // while ((res = extractMessage(&extractor, &msg))) {
-            //     if (res == -1) {
-            //         printf("Illformated message recieved\n");
-            //         break;
-            //     }
-            //     switch (msg.type) {
-            //         case M_Type:
-            //             typeString(keyboard, msg.msg.str, 0);
-            //             break;
-            //         case M_TypeDelay:
-            //             typeString(keyboard, msg.msg.str, msg.delay);
-            //             break;
-            //         case M_Press:
-            //             tapKey(keyboard, msg.msg.key);
-            //             break;
-            //         case M_Hold:
-            //             pressKey(keyboard, msg.msg.key);
-            //             break;
-            //         case M_Release:
-            //             releaseKey(keyboard, msg.msg.key);
-            //             break;
-            //         case M_PressFor:
-            //             printf("Pressing %s with a delay of %i\n", keycodeAsString(msg.msg.key), msg.delay);
-            //             pressKey(keyboard, msg.msg.key);
-            //             usleep(msg.delay*1000);
-            //             releaseKey(keyboard, msg.msg.key);
-            //             break;
-            //         case M_Delay:
-            //             usleep(msg.delay*1000);
-            //             break;
-            //         case M_RepeatNext:
-            //             fprintf(stderr, "Warning repeat command not currently supported\n");
-            //             break;
-            //         case M_ServerClose:
-            //             printf("Closing server\n");
-            //             cleanUp();
-            //             return 0;
-            //         default:
-            //             printf("Unrecognized Message type.");
-            //             break;
-                    
-            //     }
-            // }
+
             releaseAllKeys(keyboard);
 
-            printf("serial message length: %i\n", msgRef->msgLen);
-            printSerialMsg(*msgRef);
+            printf("serial message length: %i\n", msgRef.msgLen);
+            printSerialMsg(msgRef);
 
 
             // if (!strcmp(buffer, "exit")) {

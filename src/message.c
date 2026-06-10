@@ -56,22 +56,12 @@ void printSerialMsg(struct SerialMessage smsg) {
 
 
 void expandSerialMsg(struct SerialMessage *smsg, unsigned int needed) {
-    if (smsg->capacity == 0){
-        needed += 4;
-    }
     unsigned int newCap = (smsg->capacity < 32)? 32 : smsg->capacity;
     while (newCap < needed) {newCap *= 2;}
     
     smsg->msgBuffer = realloc(smsg->msgBuffer, newCap);
     smsg->capacity = newCap;
 }
-
-// void addNullTerminator(struct SerialMessage *smsg) {
-//     if (smsg->capacity < 4) {
-//         expandCompoundMsg(smsg, 4);
-//     }
-//     memset(smsg->msgBuffer + smsg->msgLen, 0, 4);
-// }
 
 
 
@@ -108,7 +98,7 @@ void deinitSerialMsg(struct SerialMessage *smsg) {
 }
 
 void clearRetainingCapacity(struct SerialMessage *smsg) {
-    smsg->msgLen = 4; // Retain empty prefix
+    smsg->msgLen = 0; // Retain empty prefix
 }
 
 void clearAndFree(struct SerialMessage *smsg) {
@@ -282,7 +272,7 @@ int serialMsgAppendTypeDelayN(struct SerialMessage *smsg, const char* msgStr, un
 struct SerialExtractor serialExtractor(struct SerialMessage *smsg) {
     struct SerialExtractor extractor = {
         smsg,
-        4 // After reserved prefix
+        0
     };
     return extractor;
 }

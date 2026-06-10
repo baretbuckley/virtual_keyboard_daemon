@@ -6,12 +6,11 @@
 #include <string.h>
 // #include <windows.h>
 
-void cleanUp(struct ClientChannel *channel, struct SerialMessage smsg) {
+void cleanUp(struct ClientChannel *channel) {
     if (channel) {
         disconnect(channel);
         freeClientChannel(channel);
     }
-    deinitSerialMsg(&smsg);
 }
 
 void initChannel(struct ClientChannel **channel, const struct ClientOptContext *clientContext) {
@@ -38,9 +37,12 @@ void initChannel(struct ClientChannel **channel, const struct ClientOptContext *
 
 }
 
-int sendSerialMessage(struct ClientChannel *channel, struct SerialMessage smsg) {
+int sendSerialMessage(struct ClientChannel *channel, unsigned char *buffer, struct SerialMessage smsg) {
     int written;
-    if ((written = sendMessage(channel, smsg)) < 0) {
+    // prefix the buffer with the message len as u32
+    *((uint32_t*)(buffer)) = smsg.msgLen;
+
+    if ((written = sendMessage(channel, buffer, smsg.msgLen + 4)) < 0) {
         printf("Failed to write to file\n");
         disconnect(channel);
         freeClientChannel(channel);
@@ -84,7 +86,8 @@ int main(int argc, char** argv) {
 
     struct ClientChannel *channel = NULL;
 
-    struct SerialMessage smsg = initSerialMsgCapacity(512);
+    unsigned char buffer[CHANNEL_BUFFER_SIZE];
+    struct SerialMessage smsg = initSerialMsgFrom(buffer+4, CHANNEL_BUFFER_SIZE-4); // First 4 bytes excluded to allow prefix to allow length prefix to be added at the beginning
     // Parse sub commands
     while (totalRead != argc) {
         int read = 0;
@@ -127,7 +130,7 @@ int main(int argc, char** argv) {
                 if (context.press.hold) {
                     if (context.press.press_delay_ms) {
                         fprintf(stderr, "The press command does not allow the use of the --hold and --hold-for flag at the same time\nrun 'vkey --help' for usage");
-                        cleanUp(channel, smsg);
+                        cleanUp(channel);
                         return -1;
                     }
                     msg.type = M_Hold;
@@ -165,7 +168,7 @@ int main(int argc, char** argv) {
                 key = keycodeFromString(context.press.key);
                 if (key == K_UNKNOWN) {
                     printf("Unknown key '%s'", context.press.key);
-                    cleanUp(channel, smsg);
+                    cleanUp(channel);
                     return -1;
                 }
                 msg.type=M_Release;
@@ -174,11 +177,11 @@ int main(int argc, char** argv) {
             
             case CMD_UNKNOWN:
                 printf("%s: Found Unknown subcommand '%s'.\n", argv[0], argv[totalRead + read]);
-                cleanUp(channel, smsg);
+                cleanUp(channel);
                 return -1;
             default:
                 printf("Real unknown found\n");
-                cleanUp(channel, smsg);
+                cleanUp(channel);
                 return -1;
         }
         if (serialMsgAppend(&smsg, msg)) {
@@ -189,7 +192,7 @@ int main(int argc, char** argv) {
                 initChannel(&channel, &clientContext);
                 if (channel == NULL) {
                     printf("Failed to open channel\n");
-                    cleanUp(channel, smsg);
+                    cleanUp(channel);
                     return -1;
                 }
             }
@@ -198,8 +201,8 @@ int main(int argc, char** argv) {
             if (serialMsgLen(smsg) > 0) {
             
                 // Send what is currently in the buffer and clear it
-                if (sendSerialMessage(channel, smsg)) {
-                    cleanUp(channel, smsg);
+                if (sendSerialMessage(channel, buffer, smsg)) {
+                    cleanUp(channel);
                     return -1;
                 }
                 clearRetainingCapacity(&smsg);
@@ -224,12 +227,12 @@ int main(int argc, char** argv) {
                         err = serialMsgAppendTypeDelayN(&smsg, msg.msg.str+idx, msg.delay, sendLen);
                     if (err) {
                         fprintf(stderr, "%s: Failed to append split message, message may be too large for buffer capacity\n", argv[0]);
-                        cleanUp(channel, smsg);
+                        cleanUp(channel);
                         return -1;
                     }
 
-                    if (sendSerialMessage(channel, smsg)) {
-                        cleanUp(channel, smsg);
+                    if (sendSerialMessage(channel, buffer, smsg)) {
+                        cleanUp(channel);
                         return -1;
                     }
                     clearRetainingCapacity(&smsg);
@@ -244,7 +247,7 @@ int main(int argc, char** argv) {
                 // If type messages are split, this should not fail,
                 // if it does likely an unhandled message type is too large.
                 fprintf(stderr, "%s: Failed to append message even after sending, message may be too large for buffer capacity\n", argv[0]);
-                cleanUp(channel, smsg);
+                cleanUp(channel);
                 return -1;
             }
 
@@ -282,20 +285,23 @@ int main(int argc, char** argv) {
         initChannel(&channel, &clientContext);
         if (channel == NULL) {
             printf("Failed to open channel\n");
-            cleanUp(channel, smsg);
+            cleanUp(channel);
             return -1;
         }
     }
 
 
-    int written;
     if (smsg.msgLen != 0) {
-        if ((written = sendMessage(channel, smsg)) < 0) {
-            printf("Failed to write to file\n");
-            disconnect(channel);
-            freeClientChannel(channel);
+        if (sendSerialMessage(channel, buffer, smsg)) {
+            cleanUp(channel);
             return -1;
         }
+        // if ((written = sendMessage(channel, buffer, smsg)) < 0) {
+        //     printf("Failed to write to file\n");
+        //     disconnect(channel);
+        //     freeClientChannel(channel);
+        //     return -1;
+        // }
         disconnect(channel);
 
         printf("Sent message:\n");
@@ -304,8 +310,7 @@ int main(int argc, char** argv) {
         printf("Msg len of 0, not sending\n");
     }
 
-    freeClientChannel(channel);
-    deinitSerialMsg(&smsg);
+    cleanUp(channel);
 
     // struct SerialMessage smsg = initSerialMsg();
     // // serialMsgAppendKey(&smsg, K_A);
