@@ -1,0 +1,24 @@
+[Unit]
+Description=Virtual Keyboard daemon vkeyd
+After=network.target
+
+[Service]
+Type=notify
+ExecStart=vkeyd
+ExecReload=/bin/kill -HUP $MAINPID
+User=root
+# StandardOutput=syslog
+# StandardError=syslog
+SyslogIdentifier=vkeyd
+
+# Security hardening
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+ProtectKernelModules=yes
+
+[Install]
+WantedBy=multi-user.target

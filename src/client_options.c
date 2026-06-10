@@ -379,7 +379,6 @@ int parseHoldCommand(const char** input, struct HoldCmdContext* context, int *re
     set_optind(1);
     const char *arg;
     *context = DEFAULT_HOLD_CONTEXT;
-    // Just parsing to handle --help option
     while (1) {
         int res = parse_opt(input, HOLD_OPTIONS, NUM_OPTIONS(HOLD_OPTIONS), &arg);
         switch (res) {

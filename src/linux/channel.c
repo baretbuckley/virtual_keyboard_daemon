@@ -116,6 +116,31 @@ struct ServerChannel *createChannelWithPath(const char *path, unsigned char *buf
     return channel;
 }
 
+struct ServerChannel *createChannelWithFD(int fd, unsigned char *buffer, unsigned int len) {
+    struct ServerChannel *channel = (struct ServerChannel *)malloc(sizeof(struct ServerChannel));
+
+
+    channel->fd = fd;
+    
+    if (len < 16) { // 4 byte len prefix + 12 bytes for the min needed capacity to fit any message type (assumes type and typeDelay can be split as needed)
+        fprintf(stderr, "Error channel buffer too small, buffer capacity must be atleast 16 bytes\n");
+        closeChannel(channel);
+        free(channel);
+    }
+    if (buffer) {
+        channel->msgBuffer = buffer;
+        channel->bufferOwned = 0;
+    } else {
+        channel->msgBuffer = (unsigned char*)malloc(len);
+        channel->bufferOwned = 1;
+    }
+    channel->msgCapacity = len;
+    
+    channel->connected = 0;
+    return channel;
+}
+
+
 void closeChannel(struct ServerChannel *channel) {
     close(channel->fd);
     unlink(channel->address.sun_path);
@@ -199,7 +224,7 @@ struct ClientChannel *openChannel(const char *name) {
     strcpy(channel->address.sun_path + (sizeof(DEFAULT_PATH_PREFIX)-1), name);
     channel->fd = open_af_unix_socket(&(channel->address));
 
-    if (connect(channel->fd, (struct sockaddr *)&(channel->address), sizeof(struct sockaddr))) {
+    if (connect(channel->fd, (struct sockaddr *)&(channel->address), sizeof(struct sockaddr)+1)) {
         fprintf(stderr, "Failed to connect to socket on Path=%s, Error: %s\n", channel->address.sun_path, strerror(errno));
         disconnect(channel);
         return NULL;
@@ -210,10 +235,16 @@ struct ClientChannel *openChannel(const char *name) {
 
 struct ClientChannel *openChannelWithPath(const char *path) {
     struct ClientChannel *channel = (struct ClientChannel *)malloc(sizeof(struct ServerChannel));
-    strcpy(channel->address.sun_path, path);
+    strcpy(channel->address.sun_path, "/run/vkeyd.sock");
     channel->fd = open_af_unix_socket(&(channel->address));
+    printf("Using path %s\n", channel->address.sun_path);
 
-    if (connect(channel->fd, (struct sockaddr *)&(channel->address), sizeof(struct sockaddr))) {
+    // socklen_t len =
+    //     offsetof(struct sockaddr_un, sun_path) +
+    //     strlen(addr.sun_path) + 1;
+
+// connect(fd, (struct sockaddr *)&addr, len);
+    if (connect(channel->fd, (struct sockaddr *)&(channel->address), sizeof(struct sockaddr_un))) {
         fprintf(stderr, "Failed to connect to socket on Path=%s, Error: %s\n", channel->address.sun_path, strerror(errno));
         disconnect(channel);
         return NULL;

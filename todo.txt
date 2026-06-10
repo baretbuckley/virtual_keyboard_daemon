@@ -6,13 +6,13 @@ Search key name
 - catch up windows back end to current (made significant changes to channel api and vkeytool not reflected in windows backend)
 - combine key files (use macros to select between implimentations, started in keycode_linux.h)
 - should you be able to do multiple keys at once using +? (i.e. press A+B+Shift)
-- have client and server channel objects be used as objects rather than passing pointer from stack?
+- have client and server channel and keyboard objects be used as objects rather than passing pointer from stack?
     would need to impl struct description in header, but should be able to eliminate the last of the mallocs in the program
 - investigate the emulating a windows driver instead of sendinput for windows (performance needs to be checked) 
     - If not should probably roll back the server from being needed on windows as currently it is pointless
 - limit need for sudo when program fails when parsing args (this means delaying channel creation till its needed)
-- make the linux backend a propper daemon 
-
+- Revise the daemon construction to better differentiate when it should create it's own socket or recieve from systremd
+- Update readme: add compile directions
 
 Completed tasks
 
@@ -25,4 +25,5 @@ Completed tasks
 - Give ability to specify channel name, for linux an additional flag is provided to specify the complete path
 - expand the press cmd usage to add flags for pressing shift, ctrl, and/or alt
 - build an actual readme to reflect the current project
+- make the linux backend a propper daemon 
 

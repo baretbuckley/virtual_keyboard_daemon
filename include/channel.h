@@ -17,6 +17,8 @@ struct ServerChannel *createChannel(const char *name, unsigned char *buffer, uns
 
 #ifdef __linux__
 struct ServerChannel *createChannelWithPath(const char *path, unsigned char *buffer, unsigned int len);
+
+struct ServerChannel *createChannelWithFD(int fd, unsigned char *buffer, unsigned int len);
 #endif
 
 void closeChannel(struct ServerChannel *channel);

@@ -1,0 +1,15 @@
+[Unit]
+Description=Virtual Keyboard daemon socket
+
+[Socket]
+ListenStream=/run/vkeyd.sock
+SocketUser=root
+SocketMode=0666
+Accept=no
+
+# Optional:
+ReusePort=yes
+Backlog=128
+
+[Install]
+WantedBy=sockets.target

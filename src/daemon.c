@@ -13,9 +13,16 @@
 #include <signal.h>
 #include <unistd.h>
 
+#include <systemd/sd-daemon.h>
+
 // #pragma comment(lib, "Ws2_32.lib")
 
-
+int recieve_socket() {
+    int n = sd_listen_fds(0);
+    if (n != 1) return -1;
+    int listen_fd = SD_LISTEN_FDS_START;
+    return listen_fd;
+}
 
 static struct KeyBoard *keyboard = NULL;
 static struct ServerChannel *channel = NULL;
@@ -170,7 +177,14 @@ int main(int argc, const char **argv) {
         channel = createChannel(context.channelName, msgBuffer, CHANNEL_BUFFER_SIZE);
     } else {
         printf("Using default name\n");
-        channel = createChannel("vkeyd", msgBuffer, CHANNEL_BUFFER_SIZE);
+        int fd = recieve_socket();
+        if (fd < 0) {
+            cleanUp();
+            return -1;
+        }
+        channel = createChannelWithFD(fd, msgBuffer, CHANNEL_BUFFER_SIZE);
+        usleep(100);
+        sd_notify(0, "READY=1");
     }
 
 
@@ -196,7 +210,7 @@ int main(int argc, const char **argv) {
             printf("Recieving message\n");
             
             if (recieveMessage(channel, &msgRef) < 0) {
-                printf("Failed to read from pipe.");
+                printf("Failed to read from pipe.\n");
                 cleanUp();
                 return -1;
             }
