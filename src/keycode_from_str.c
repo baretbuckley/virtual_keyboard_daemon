@@ -31,6 +31,84 @@ enum KeyCode keycodeFromString(const char *keyName) {
     case '\0': return K_U;
     default: return K_UNKNOWN;
     }
+  case 'R':
+    switch (keyName[1]) {
+    case 'e':
+      switch (keyName[2]) {
+      case 's':
+        if (!strcmp(&keyName[3], "erved")) {
+          return K_Reserved;
+        } else {
+          return K_UNKNOWN;
+        }
+      case 't':
+        if (!strcmp(&keyName[3], "urn")) {
+          return K_Return;
+        } else {
+          return K_UNKNOWN;
+        }
+      default: return K_UNKNOWN;
+      }
+    case 'S':
+      switch (keyName[2]) {
+      case 'h':
+        if (!strcmp(&keyName[3], "ift")) {
+          return K_RShift;
+        } else {
+          return K_UNKNOWN;
+        }
+      case 'q':
+        if (!strcmp(&keyName[3], "uareBracket_RCurlyBracket")) {
+          return K_RSquareBracket_RCurlyBracket;
+        } else {
+          return K_UNKNOWN;
+        }
+      default: return K_UNKNOWN;
+      }
+    case 'C':
+      if (!strcmp(&keyName[2], "ontrol")) {
+        return K_RControl;
+      } else {
+        return K_UNKNOWN;
+      }
+    case 'W':
+      if (!strcmp(&keyName[2], "indows")) {
+        return K_RWindows;
+      } else {
+        return K_UNKNOWN;
+      }
+    case 'A':
+      if (!strcmp(&keyName[2], "lt")) {
+        return K_RAlt;
+      } else {
+        return K_UNKNOWN;
+      }
+    case 'i':
+      switch (keyName[2]) {
+      case 'g':
+        switch (keyName[3]) {
+        case 'h':
+          switch (keyName[4]) {
+          case 't':
+            switch (keyName[5]) {
+            case 'M':
+              if (!strcmp(&keyName[6], "ouse")) {
+                return K_RightMouse;
+              } else {
+                return K_UNKNOWN;
+              }
+            case '\0': return K_Right;
+            default: return K_UNKNOWN;
+            }
+          default: return K_UNKNOWN;
+          }
+        default: return K_UNKNOWN;
+        }
+      default: return K_UNKNOWN;
+      }
+    case '\0': return K_R;
+    default: return K_UNKNOWN;
+    }
   case 'T':
     switch (keyName[1]) {
     case 'a':
@@ -130,74 +208,6 @@ enum KeyCode keycodeFromString(const char *keyName) {
         return K_UNKNOWN;
       }
     case '\0': return K_S;
-    default: return K_UNKNOWN;
-    }
-  case 'R':
-    switch (keyName[1]) {
-    case 'e':
-      if (!strcmp(&keyName[2], "turn")) {
-        return K_Return;
-      } else {
-        return K_UNKNOWN;
-      }
-    case 'S':
-      switch (keyName[2]) {
-      case 'h':
-        if (!strcmp(&keyName[3], "ift")) {
-          return K_RShift;
-        } else {
-          return K_UNKNOWN;
-        }
-      case 'q':
-        if (!strcmp(&keyName[3], "uareBracket_RCurlyBracket")) {
-          return K_RSquareBracket_RCurlyBracket;
-        } else {
-          return K_UNKNOWN;
-        }
-      default: return K_UNKNOWN;
-      }
-    case 'C':
-      if (!strcmp(&keyName[2], "ontrol")) {
-        return K_RControl;
-      } else {
-        return K_UNKNOWN;
-      }
-    case 'W':
-      if (!strcmp(&keyName[2], "indows")) {
-        return K_RWindows;
-      } else {
-        return K_UNKNOWN;
-      }
-    case 'A':
-      if (!strcmp(&keyName[2], "lt")) {
-        return K_RAlt;
-      } else {
-        return K_UNKNOWN;
-      }
-    case 'i':
-      switch (keyName[2]) {
-      case 'g':
-        switch (keyName[3]) {
-        case 'h':
-          switch (keyName[4]) {
-          case 't':
-            switch (keyName[5]) {
-            case 'M':
-              if (!strcmp(&keyName[6], "ouse")) {
-                return K_RightMouse;
-              } else {
-                return K_UNKNOWN;
-              }
-            case '\0': return K_Right;
-            default: return K_UNKNOWN;
-            }
-          default: return K_UNKNOWN;
-          }
-        default: return K_UNKNOWN;
-        }
-      default: return K_UNKNOWN;
-      }
-    case '\0': return K_R;
     default: return K_UNKNOWN;
     }
   case 'D':

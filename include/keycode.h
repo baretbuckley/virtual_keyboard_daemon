@@ -27,7 +27,8 @@
 // TODO: Transcripe to use WinUser.h macros rather than copying the constants
 enum KeyCode {
     K_UNKNOWN             = 0x0, // *DEFAULT* (flag used in auto file gen to signal default/unknown keycode)
-    
+    K_Reserved            = SELECT_KEY( 0,                          0xFF),
+
     // white space keys
     K_Tab                 = SELECT_KEY( KEY_TAB,                    VK_TAB ),
     K_Space               = SELECT_KEY( KEY_SPACE,                  VK_SPACE ),

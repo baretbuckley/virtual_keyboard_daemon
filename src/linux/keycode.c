@@ -2,6 +2,8 @@
 
 const char* keycodeAsString(enum KeyCode code) {
     switch (code) {
+        case K_UNKNOWN: return "UNKNOWN";
+        
         // white space keys
         case K_Tab: return "Tab";
         case K_Space: return "Space";
