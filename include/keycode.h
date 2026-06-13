@@ -59,12 +59,6 @@ enum KeyCode {
     K_Select              = SELECT_KEY( KEY_SELECT,                 VK_SELECT ),
     K_Insert              = SELECT_KEY( KEY_INSERT,                 VK_INSERT ),
 
-    // 
-    K_Print               = SELECT_KEY( KEY_PRINT,                  VK_PRINT ),
-    K_Execute             = SELECT_KEY( 0,                          VK_EXECUTE ), // TODO: find replacement and if not do we need this key
-    K_Snapshot            = SELECT_KEY( KEY_SELECTIVE_SCREENSHOT,   VK_SNAPSHOT ), // TODO: Check if this is right conversion
-    K_Help                = SELECT_KEY( KEY_HELP,                   VK_HELP ),
-
     // Cursor movement keys
     K_Left                = SELECT_KEY( KEY_LEFT,                   VK_LEFT ),
     K_Up                  = SELECT_KEY( KEY_UP,                     VK_UP ),
@@ -125,8 +119,6 @@ enum KeyCode {
     K_SingleQuote_DoubleQuote       = SELECT_KEY( KEY_APOSTROPHE,           VK_OEM_7 ),  //  ''"' for US
 
 
-    K_Apps                = SELECT_KEY( KEY_APPSELECT,              VK_APPS ), // TODO: Confirm
-    K_Sleep               = SELECT_KEY( KEY_SLEEP,                  VK_SLEEP ),
 
 
     // Mouse keys
@@ -190,7 +182,16 @@ enum KeyCode {
     K_MediaNext           = SELECT_KEY( KEY_MEDIA_NEXT_TRACK,       VK_MEDIA_NEXT_TRACK ),
     K_MediaPrevTrack      = SELECT_KEY( KEY_MEDIA_PREV_TRACK,       VK_MEDIA_PREV_TRACK ),
     K_MediaStop           = SELECT_KEY( KEY_MEDIA_STOP,             VK_MEDIA_STOP ),
-    K_MediaPlayPause      = SELECT_KEY( KEY_MEDIA_PLAY_PAUSE,       VK_MEDIA_PLAY_PAUSE )
+    K_MediaPlayPause      = SELECT_KEY( KEY_MEDIA_PLAY_PAUSE,       VK_MEDIA_PLAY_PAUSE ),
+
+
+    // Msc keys
+    K_Print               = SELECT_KEY( KEY_PRINT,                  VK_PRINT ),
+    K_Execute             = SELECT_KEY( 0,                          VK_EXECUTE ), // TODO: find replacement and if not do we need this key
+    K_Snapshot            = SELECT_KEY( KEY_SELECTIVE_SCREENSHOT,   VK_SNAPSHOT ), // TODO: Check if this is right conversion
+    K_Help                = SELECT_KEY( KEY_HELP,                   VK_HELP ),
+    K_Apps                = SELECT_KEY( KEY_APPSELECT,              VK_APPS ), // TODO: Confirm
+    K_Sleep               = SELECT_KEY( KEY_SLEEP,                  VK_SLEEP ),
 
 };
 

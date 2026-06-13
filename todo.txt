@@ -12,6 +12,7 @@ Search key name
 - limit need for sudo when program fails when parsing args (this means delaying channel creation till its needed)
 - Revise the daemon construction to better differentiate when it should create it's own socket or recieve from systremd
 - Update readme: add compile directions
+- Add option to create_comp_time_trie script that if less than some number of terminals, just go through with strcmp in if else chain (goal of shrinking generated code)
 
 Completed tasks
 

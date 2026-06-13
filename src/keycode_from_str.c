@@ -72,15 +72,9 @@ enum KeyCode keycodeFromString(const char *keyName) {
         }
       default: return K_UNKNOWN;
       }
-    case 'n':
-      if (!strcmp(&keyName[2], "apshot")) {
-        return K_Snapshot;
-      } else {
-        return K_UNKNOWN;
-      }
-    case 'l':
-      if (!strcmp(&keyName[2], "eep")) {
-        return K_Sleep;
+    case 'i':
+      if (!strcmp(&keyName[2], "ngleQuote_DoubleQuote")) {
+        return K_SingleQuote_DoubleQuote;
       } else {
         return K_UNKNOWN;
       }
@@ -123,9 +117,15 @@ enum KeyCode keycodeFromString(const char *keyName) {
       } else {
         return K_UNKNOWN;
       }
-    case 'i':
-      if (!strcmp(&keyName[2], "ngleQuote_DoubleQuote")) {
-        return K_SingleQuote_DoubleQuote;
+    case 'n':
+      if (!strcmp(&keyName[2], "apshot")) {
+        return K_Snapshot;
+      } else {
+        return K_UNKNOWN;
+      }
+    case 'l':
+      if (!strcmp(&keyName[2], "eep")) {
+        return K_Sleep;
       } else {
         return K_UNKNOWN;
       }
@@ -361,15 +361,15 @@ enum KeyCode keycodeFromString(const char *keyName) {
       } else {
         return K_UNKNOWN;
       }
-    case 'x':
-      if (!strcmp(&keyName[2], "ecute")) {
-        return K_Execute;
-      } else {
-        return K_UNKNOWN;
-      }
     case 'q':
       if (!strcmp(&keyName[2], "ual")) {
         return K_Equal;
+      } else {
+        return K_UNKNOWN;
+      }
+    case 'x':
+      if (!strcmp(&keyName[2], "ecute")) {
+        return K_Execute;
       } else {
         return K_UNKNOWN;
       }
@@ -379,20 +379,64 @@ enum KeyCode keycodeFromString(const char *keyName) {
   case 'M':
     switch (keyName[1]) {
     case 'e':
-      if (!strcmp(&keyName[2], "nu")) {
-        return K_Menu;
+      switch (keyName[2]) {
+      case 'n':
+        if (!strcmp(&keyName[3], "u")) {
+          return K_Menu;
+        } else {
+          return K_UNKNOWN;
+        }
+      case 'd':
+        switch (keyName[3]) {
+        case 'i':
+          switch (keyName[4]) {
+          case 'a':
+            switch (keyName[5]) {
+            case 'N':
+              if (!strcmp(&keyName[6], "ext")) {
+                return K_MediaNext;
+              } else {
+                return K_UNKNOWN;
+              }
+            case 'P':
+              switch (keyName[6]) {
+              case 'r':
+                if (!strcmp(&keyName[7], "evTrack")) {
+                  return K_MediaPrevTrack;
+                } else {
+                  return K_UNKNOWN;
+                }
+              case 'l':
+                if (!strcmp(&keyName[7], "ayPause")) {
+                  return K_MediaPlayPause;
+                } else {
+                  return K_UNKNOWN;
+                }
+              default: return K_UNKNOWN;
+              }
+            case 'S':
+              if (!strcmp(&keyName[6], "top")) {
+                return K_MediaStop;
+              } else {
+                return K_UNKNOWN;
+              }
+            default: return K_UNKNOWN;
+            }
+          default: return K_UNKNOWN;
+          }
+        default: return K_UNKNOWN;
+        }
+      default: return K_UNKNOWN;
+      }
+    case 'i':
+      if (!strcmp(&keyName[2], "nus_Underscore")) {
+        return K_Minus_Underscore;
       } else {
         return K_UNKNOWN;
       }
     case 'u':
       if (!strcmp(&keyName[2], "ltiply")) {
         return K_Multiply;
-      } else {
-        return K_UNKNOWN;
-      }
-    case 'i':
-      if (!strcmp(&keyName[2], "nus_Underscore")) {
-        return K_Minus_Underscore;
       } else {
         return K_UNKNOWN;
       }
@@ -407,15 +451,15 @@ enum KeyCode keycodeFromString(const char *keyName) {
       } else {
         return K_UNKNOWN;
       }
-    case 'p':
-      if (!strcmp(&keyName[2], "ps")) {
-        return K_Apps;
-      } else {
-        return K_UNKNOWN;
-      }
     case 'd':
       if (!strcmp(&keyName[2], "d")) {
         return K_Add;
+      } else {
+        return K_UNKNOWN;
+      }
+    case 'p':
+      if (!strcmp(&keyName[2], "ps")) {
+        return K_Apps;
       } else {
         return K_UNKNOWN;
       }
@@ -448,12 +492,6 @@ enum KeyCode keycodeFromString(const char *keyName) {
         }
       default: return K_UNKNOWN;
       }
-    case 'r':
-      if (!strcmp(&keyName[2], "int")) {
-        return K_Print;
-      } else {
-        return K_UNKNOWN;
-      }
     case 'l':
       if (!strcmp(&keyName[2], "us_Equal")) {
         return K_Plus_Equal;
@@ -463,6 +501,12 @@ enum KeyCode keycodeFromString(const char *keyName) {
     case 'e':
       if (!strcmp(&keyName[2], "riod_RAngleBracket")) {
         return K_Period_RAngleBracket;
+      } else {
+        return K_UNKNOWN;
+      }
+    case 'r':
+      if (!strcmp(&keyName[2], "int")) {
+        return K_Print;
       } else {
         return K_UNKNOWN;
       }
@@ -529,6 +573,12 @@ enum KeyCode keycodeFromString(const char *keyName) {
     else return K_UNKNOWN;
   case 'F':
     switch (keyName[1]) {
+    case 'o':
+      if (!strcmp(&keyName[2], "rwardSlash_QuestionMark")) {
+        return K_ForwardSlash_QuestionMark;
+      } else {
+        return K_UNKNOWN;
+      }
     case '1':
       switch (keyName[2]) {
       case '0':
@@ -605,12 +655,6 @@ enum KeyCode keycodeFromString(const char *keyName) {
     case '9':
       if (keyName[2] == '\0') return K_F9;
       else return K_UNKNOWN;
-    case 'o':
-      if (!strcmp(&keyName[2], "rwardSlash_QuestionMark")) {
-        return K_ForwardSlash_QuestionMark;
-      } else {
-        return K_UNKNOWN;
-      }
     case '\0': return K_F;
     default: return K_UNKNOWN;
     }
@@ -699,8 +743,48 @@ enum KeyCode keycodeFromString(const char *keyName) {
     if (keyName[1] == '\0') return K_Q;
     else return K_UNKNOWN;
   case 'V':
-    if (keyName[1] == '\0') return K_V;
-    else return K_UNKNOWN;
+    switch (keyName[1]) {
+    case 'o':
+      switch (keyName[2]) {
+      case 'l':
+        switch (keyName[3]) {
+        case 'u':
+          switch (keyName[4]) {
+          case 'm':
+            switch (keyName[5]) {
+            case 'e':
+              switch (keyName[6]) {
+              case 'M':
+                if (!strcmp(&keyName[7], "ute")) {
+                  return K_VolumeMute;
+                } else {
+                  return K_UNKNOWN;
+                }
+              case 'D':
+                if (!strcmp(&keyName[7], "own")) {
+                  return K_VolumeDown;
+                } else {
+                  return K_UNKNOWN;
+                }
+              case 'U':
+                if (!strcmp(&keyName[7], "p")) {
+                  return K_VolumeUp;
+                } else {
+                  return K_UNKNOWN;
+                }
+              default: return K_UNKNOWN;
+              }
+            default: return K_UNKNOWN;
+            }
+          default: return K_UNKNOWN;
+          }
+        default: return K_UNKNOWN;
+        }
+      default: return K_UNKNOWN;
+      }
+    case '\0': return K_V;
+    default: return K_UNKNOWN;
+    }
   case 'W':
     if (keyName[1] == '\0') return K_W;
     else return K_UNKNOWN;

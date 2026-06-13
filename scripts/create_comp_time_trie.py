@@ -9,7 +9,7 @@
 #   generated code is human readable
 
 
-ENUM_FILE = "include/linux/keycode_linux.h"
+ENUM_FILE = "include/keycode.h"
 OUTPUT_FILE = "src/keycode_from_str.c"
 
 # Any needed boiler plate to add at start of file
@@ -162,6 +162,8 @@ class EnumInfo:
             raise Exception("Encountered unexpecred end of line reading enum", self.enum_name)
         line = line.strip()
         if not line:
+            return True
+        if line[0:2] == '//':
             return True
         if line[0] == '}':
             return False

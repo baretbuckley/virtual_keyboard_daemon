@@ -1,128 +1,230 @@
 
 
 #include <stdio.h>
+#include <keycode.h>
+
+const char *whiteSpaceKeys[] = {
+    // white space keys
+    "Tab",
+    "Space",
+    "Return",
+    "Delete",
+    "BackSpace",
+    "Shift",
+    "LShift",
+    "RShift",
+    "Capital",
+};
+
+const char *controlKeys[] = {
+    // Control keys
+    "Escape",
+    "Control",
+    "LControl",
+    "RControl",
+    "Menu",
+    "LWindows",
+    "RWindows",
+    "Alt",
+    "LAlt",
+    "RAlt",
+};
+
+
+const char *editingKeys[] = {
+    // Editing keys
+    "PageUp",
+    "PageDown",
+    "End",
+    "Home",
+    "Select",
+    "Insert",
+};
+
+
+const char *cursorMovementKeys[] = {
+    // Cursor movement keys
+    "Left",
+    "Up",
+    "Right",
+    "Down",
+};
+
+const char *alphanumericKeys[] = {
+    // Alphanumeric keys
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z",
+};
+
+const char *specialCharacterKeys[] = {
+    // Special character keys
+    // (note the naming convention is based on US keyboard layout,
+    //  K_<non shifted char>_<shifted char>)
+    "Semicolon_Colon",
+    "Plus_Equal",
+    "Comma_LAngleBracket",
+    "Minus_Underscore",
+    "Period_RAngleBracket",
+    "ForwardSlash_QuestionMark",
+    "Grave_Tilde",
+    "LSquareBracket_LCurlyBracket",
+    "Backslash_Pipe",
+    "RSquareBracket_RCurlyBracket",
+    "SingleQuote_DoubleQuote",
+};
+
+const char *mouseKeys[] = {
+    // Mouse keys
+    "Scroll",
+    "ScrollUp",
+    "ScrollDown",
+    "LeftMouse",
+    "RightMouse",
+};
+
+const char *numpadKeys[] = {
+    // Numpad keys
+    "Numpad0",
+    "Numpad1",
+    "Numpad2",
+    "Numpad3",
+    "Numpad4",
+    "Numpad5",
+    "Numpad6",
+    "Numpad7",
+    "Numpad8",
+    "Numpad9",
+    "Multiply",
+    "Add",
+    "Subtract",
+    "Decimal",
+    "Divide",
+    "Equal",
+    "Numlock",
+};
+
+const char *functionKeys[] = {
+    // Function keys
+    "F1",
+    "F1",
+    "F2",
+    "F2",
+    "F3",
+    "F3",
+    "F4",
+    "F4",
+    "F5",
+    "F5",
+    "F6",
+    "F6",
+    "F7",
+    "F7",
+    "F8",
+    "F8",
+    "F9",
+    "F9",
+    "F10",
+    "F10",
+    "F11",
+    "F11",
+    "F12",
+    "F13",
+    "F14",
+    "F15",
+    "F16",
+    "F17",
+    "F18",
+    "F19",
+    "F20",
+    "F21",
+    "F22",
+    "F23",
+    "F24",
+};
+
+const char *mediaKeys[] = {
+    // Media and audio keys
+    // Note currentl linux keys are unconfirmed
+    "VolumeMute",
+    "VolumeDown",
+    "VolumeUp",
+    "MediaNext",
+    "MediaPrevTrack",
+    "MediaStop",
+    "MediaPlayPause",
+};
+
+const char *mscKeys[] = {
+    // Msc keys
+    "Print",
+    "Execute",
+    "Snapshot",
+    "Help",
+    "Apps",
+    "Sleep",
+};
+
+void printSection(const char *name, const char **keycodes, unsigned int size) {
+    printf("\n%s:\n", name);
+    for (int i = 0; i < size/sizeof(const char *); i++) {
+        printf("key '%s'\n", keycodes[i]);
+    }
+}
 
 void printKeys() {
-    printf("Key '%s'\n", "UNKNOWN");
-    printf("Key '%s'\n", "BackSpace");
-    printf("Key '%s'\n", "Tab");
-    printf("Key '%s'\n", "Return");
-    printf("Key '%s'\n", "Shift");
-    printf("Key '%s'\n", "LShift");
-    printf("Key '%s'\n", "RShift");
-    printf("Key '%s'\n", "Control");
-    printf("Key '%s'\n", "ControlLeft");
-    printf("Key '%s'\n", "ControlRight");
-    printf("Key '%s'\n", "Menu");
-    printf("Key '%s'\n", "Capital");
-    printf("Key '%s'\n", "Escape");
-    printf("Key '%s'\n", "Space");
-    printf("Key '%s'\n", "PageUp");
-    printf("Key '%s'\n", "PageDown");
-    printf("Key '%s'\n", "End");
-    printf("Key '%s'\n", "Home");
-    printf("Key '%s'\n", "Left");
-    printf("Key '%s'\n", "Up");
-    printf("Key '%s'\n", "Right");
-    printf("Key '%s'\n", "Down");
-    printf("Key '%s'\n", "Select");
-    printf("Key '%s'\n", "Print");
-    printf("Key '%s'\n", "Execute");
-    printf("Key '%s'\n", "Snapshot");
-    printf("Key '%s'\n", "Insert");
-    printf("Key '%s'\n", "Delete");
-    printf("Key '%s'\n", "Help");
-    printf("Key '%s'\n", "0");
-    printf("Key '%s'\n", "1");
-    printf("Key '%s'\n", "2");
-    printf("Key '%s'\n", "3");
-    printf("Key '%s'\n", "4");
-    printf("Key '%s'\n", "5");
-    printf("Key '%s'\n", "6");
-    printf("Key '%s'\n", "7");
-    printf("Key '%s'\n", "8");
-    printf("Key '%s'\n", "9");
-    printf("Key '%s'\n", "A");
-    printf("Key '%s'\n", "B");
-    printf("Key '%s'\n", "C");
-    printf("Key '%s'\n", "D");
-    printf("Key '%s'\n", "E");
-    printf("Key '%s'\n", "F");
-    printf("Key '%s'\n", "G");
-    printf("Key '%s'\n", "H");
-    printf("Key '%s'\n", "I");
-    printf("Key '%s'\n", "J");
-    printf("Key '%s'\n", "K");
-    printf("Key '%s'\n", "L");
-    printf("Key '%s'\n", "M");
-    printf("Key '%s'\n", "N");
-    printf("Key '%s'\n", "O");
-    printf("Key '%s'\n", "P");
-    printf("Key '%s'\n", "Q");
-    printf("Key '%s'\n", "R");
-    printf("Key '%s'\n", "S");
-    printf("Key '%s'\n", "T");
-    printf("Key '%s'\n", "U");
-    printf("Key '%s'\n", "V");
-    printf("Key '%s'\n", "W");
-    printf("Key '%s'\n", "X");
-    printf("Key '%s'\n", "Y");
-    printf("Key '%s'\n", "Z");
-    printf("Key '%s'\n", "LeftWindows");
-    printf("Key '%s'\n", "RightWindows");
-    printf("Key '%s'\n", "Apps");
-    printf("Key '%s'\n", "Sleep");
-    printf("Key '%s'\n", "Numpad0");
-    printf("Key '%s'\n", "Numpad1");
-    printf("Key '%s'\n", "Numpad2");
-    printf("Key '%s'\n", "Numpad3");
-    printf("Key '%s'\n", "Numpad4");
-    printf("Key '%s'\n", "Numpad5");
-    printf("Key '%s'\n", "Numpad6");
-    printf("Key '%s'\n", "Numpad7");
-    printf("Key '%s'\n", "Numpad8");
-    printf("Key '%s'\n", "Numpad9");
-    printf("Key '%s'\n", "Multiply");
-    printf("Key '%s'\n", "Add");
-    printf("Key '%s'\n", "Subtract");
-    printf("Key '%s'\n", "Decimal");
-    printf("Key '%s'\n", "Divide");
-    printf("Key '%s'\n", "F1");
-    printf("Key '%s'\n", "F2");
-    printf("Key '%s'\n", "F3");
-    printf("Key '%s'\n", "F4");
-    printf("Key '%s'\n", "F5");
-    printf("Key '%s'\n", "F6");
-    printf("Key '%s'\n", "F7");
-    printf("Key '%s'\n", "F8");
-    printf("Key '%s'\n", "F9");
-    printf("Key '%s'\n", "F10");
-    printf("Key '%s'\n", "F11");
-    printf("Key '%s'\n", "F12");
-    printf("Key '%s'\n", "F13");
-    printf("Key '%s'\n", "F14");
-    printf("Key '%s'\n", "F15");
-    printf("Key '%s'\n", "F16");
-    printf("Key '%s'\n", "F17");
-    printf("Key '%s'\n", "F18");
-    printf("Key '%s'\n", "F19");
-    printf("Key '%s'\n", "F20");
-    printf("Key '%s'\n", "F21");
-    printf("Key '%s'\n", "F22");
-    printf("Key '%s'\n", "F23");
-    printf("Key '%s'\n", "F24");
-    printf("Key '%s'\n", "Numlock");
-    printf("Key '%s'\n", "Scroll");
-    printf("Key '%s'\n", "Equal");
-    printf("Key '%s'\n", "Colon_Semicolon");
-    printf("Key '%s'\n", "Plus_Equal");
-    printf("Key '%s'\n", "Comma_LAngleBracket");
-    printf("Key '%s'\n", "Minus_Underscore");
-    printf("Key '%s'\n", "Period_RAngleBracket");
-    printf("Key '%s'\n", "ForwardSlash_QuestionMark");
-    printf("Key '%s'\n", "Grave_Tilde");
-    printf("Key '%s'\n", "LSquareBracket_LCurlyBracket");
-    printf("Key '%s'\n", "Backslash_Pipe");
-    printf("Key '%s'\n", "RSquareBracket_RCurlyBracket");
-    printf("Key '%s'\n", "SingleQuote_DoubleQuote");
+    printSection("White space keys", whiteSpaceKeys, sizeof(whiteSpaceKeys));
+
+    printSection("Control keys", controlKeys, sizeof(controlKeys));
+
+    printSection("Editing keys", editingKeys, sizeof(editingKeys));
+
+    printSection("Cursor movement keys", cursorMovementKeys, sizeof(cursorMovementKeys));
+
+    printSection("Alphanumeric keys", alphanumericKeys, sizeof(alphanumericKeys));
+
+    printSection("Special character keys", specialCharacterKeys, sizeof(specialCharacterKeys));
+
+    printSection("Mouse keys", mouseKeys, sizeof(mouseKeys));
+
+    printSection("Numpad keys", numpadKeys, sizeof(numpadKeys));
+
+    printSection("Function keys", functionKeys, sizeof(functionKeys));
+
+    printSection("Media keys", mediaKeys, sizeof(mediaKeys));
+
+    printSection("Msc keys", mscKeys, sizeof(mscKeys));
 }
