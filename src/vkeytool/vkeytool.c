@@ -1,17 +1,17 @@
-#include <fcntl.h>
-#include <linux/input.h>
-
 #include "print_keys.c"
-#include "key_reader.c"
+
+#if defined(_WIN32) || defined(_WIN64)
+    #include "windows.c/key_reader.c"
+#elif defined(__linux__)
+    #include "linux.c/key_reader.c"
+#else
+    #error "Unsupported platform"
+#endif
 
 #include <string.h>
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <errno.h>
-#include <dirent.h>
 
 
 

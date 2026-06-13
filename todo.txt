@@ -3,8 +3,7 @@ Todo list for future additions the the current program
 
 Search key name
 - add opts for all produced exes (just need to do vkeytool opts at this point, but should need much)
-- catch up windows back end to current (made significant changes to channel api and vkeytool not reflected in windows backend)
-- combine key files (use macros to select between implimentations, started in keycode_linux.h)
+- catch up windows back end to current (only vkeytool left to do)
 - should you be able to do multiple keys at once using +? (i.e. press A+B+Shift)
 - have client and server channel and keyboard objects be used as objects rather than passing pointer from stack?
     would need to impl struct description in header, but should be able to eliminate the last of the mallocs in the program
@@ -26,4 +25,5 @@ Completed tasks
 - expand the press cmd usage to add flags for pressing shift, ctrl, and/or alt
 - build an actual readme to reflect the current project
 - make the linux backend a propper daemon 
+- combine key files (use macros to select between implimentations, started in keycode_linux.h)
 
