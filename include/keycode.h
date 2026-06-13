@@ -182,7 +182,15 @@ enum KeyCode {
     K_F24                 = SELECT_KEY( KEY_F24,                    VK_F24 ),
     
     
-    
+    // Media and audio keys
+    // Note currentl linux keys are unconfirmed
+    K_VolumeMute          = SELECT_KEY( KEY_VOLUME_MUTE,            VK_VOLUME_MUTE ),
+    K_VolumeDown          = SELECT_KEY( KEY_VOLUME_DOWN,            VK_VOLUME_DOWN ),
+    K_VolumeUp            = SELECT_KEY( KEY_VOLUME_UP,              VK_VOLUME_UP ),
+    K_MediaNext           = SELECT_KEY( KEY_MEDIA_NEXT_TRACK,       VK_MEDIA_NEXT_TRACK ),
+    K_MediaPrevTrack      = SELECT_KEY( KEY_MEDIA_PREV_TRACK,       VK_MEDIA_PREV_TRACK ),
+    K_MediaStop           = SELECT_KEY( KEY_MEDIA_STOP,             VK_MEDIA_STOP ),
+    K_MediaPlayPause      = SELECT_KEY( KEY_MEDIA_PLAY_PAUSE,       VK_MEDIA_PLAY_PAUSE )
 
 };
 
