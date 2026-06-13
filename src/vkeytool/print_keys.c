@@ -188,6 +188,17 @@ const char *mediaKeys[] = {
     "MediaPlayPause",
 };
 
+const char *browserKeys[] = {
+    // Browser keys
+    "BrowserBack",
+    "BrowserForward",
+    "BrowserRefresh",
+    "BrowserStop",
+    "BrowserSearch",
+    "BrowserFavorites",
+    "BrowserHome",
+};
+
 const char *mscKeys[] = {
     // Msc keys
     "Print",

@@ -3,7 +3,7 @@
 const char* keycodeAsString(enum KeyCode code) {
     switch (code) {
         case K_UNKNOWN: return "UNKNOWN";
-        
+
         // white space keys
         case K_Tab: return "Tab";
         case K_Space: return "Space";
@@ -156,6 +156,16 @@ const char* keycodeAsString(enum KeyCode code) {
         case K_MediaPrevTrack: return "MediaPrevTrack";
         case K_MediaStop: return "MediaStop";
         case K_MediaPlayPause: return "MediaPlayPause";
+
+
+        // Browser keys
+        case K_BrowserBack: return "BrowserBack";
+        case K_BrowserForward: return "BrowserForward";
+        case K_BrowserRefresh: return "BrowserRefresh";
+        case K_BrowserStop: return "BrowserStop";
+        case K_BrowserSearch: return "BrowserSearch";
+        case K_BrowserFavorites: return "BrowserFavorites";
+        case K_BrowserHome: return "BrowserHome";
 
 
         // Msc keys

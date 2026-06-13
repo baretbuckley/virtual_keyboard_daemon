@@ -45,7 +45,7 @@ enum KeyCode {
     K_Control             = SELECT_KEY( KEY_LEFTCTRL,               VK_CONTROL ),
     K_LControl            = SELECT_KEY( KEY_LEFTCTRL,               VK_LCONTROL ),
     K_RControl            = SELECT_KEY( KEY_RIGHTCTRL,              VK_RCONTROL ),
-    K_Menu                = SELECT_KEY( KEY_MENU,                   VK_MENU ), // Todo check if this is right. Does windows use menue for alt?
+    K_Menu                = SELECT_KEY( KEY_MENU,                   VK_MENU ), // Todo check if this is right.
     K_LWindows            = SELECT_KEY( KEY_LEFTMETA,               VK_LWIN ),
     K_RWindows            = SELECT_KEY( KEY_RIGHTMETA,              VK_RWIN ),
     K_Alt                 = SELECT_KEY( KEY_LEFTALT,                VK_MENU ),
@@ -185,6 +185,14 @@ enum KeyCode {
     K_MediaStop           = SELECT_KEY( KEY_MEDIA_STOP,             VK_MEDIA_STOP ),
     K_MediaPlayPause      = SELECT_KEY( KEY_MEDIA_PLAY_PAUSE,       VK_MEDIA_PLAY_PAUSE ),
 
+    // Browser keys
+    K_BrowserBack        = SELECT_KEY( 0,                          VK_BROWSER_BACK ),
+    K_BrowserForward     = SELECT_KEY( 0,                          VK_BROWSER_FORWARD ),
+    K_BrowserRefresh     = SELECT_KEY( 0,                          VK_BROWSER_REFRESH ),
+    K_BrowserStop        = SELECT_KEY( 0,                          VK_BROWSER_STOP ),
+    K_BrowserSearch      = SELECT_KEY( 0,                          VK_BROWSER_SEARCH ),
+    K_BrowserFavorites   = SELECT_KEY( 0,                          VK_BROWSER_FAVORITES ),
+    K_BrowserHome        = SELECT_KEY( 0,                          VK_BROWSER_HOME ),
 
     // Msc keys
     K_Print               = SELECT_KEY( KEY_PRINT,                  VK_PRINT ),
@@ -193,6 +201,7 @@ enum KeyCode {
     K_Help                = SELECT_KEY( KEY_HELP,                   VK_HELP ),
     K_Apps                = SELECT_KEY( KEY_APPSELECT,              VK_APPS ), // TODO: Confirm
     K_Sleep               = SELECT_KEY( KEY_SLEEP,                  VK_SLEEP ),
+
 
 };
 

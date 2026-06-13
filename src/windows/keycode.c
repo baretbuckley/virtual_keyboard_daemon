@@ -158,6 +158,14 @@ const char* keycodeAsString(enum KeyCode code) {
         case K_MediaStop: return "MediaStop";
         case K_MediaPlayPause: return "MediaPlayPause";
 
+        // Browser keys
+        case K_BrowserBack: return "BrowserBack";
+        case K_BrowserForward: return "BrowserForward";
+        case K_BrowserRefresh: return "BrowserRefresh";
+        case K_BrowserStop: return "BrowserStop";
+        case K_BrowserSearch: return "BrowserSearch";
+        case K_BrowserFavorites: return "BrowserFavorites";
+        case K_BrowserHome: return "BrowserHome";
 
         // Msc keys
         case K_Print: return "Print"; 
