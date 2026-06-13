@@ -28,6 +28,7 @@
 enum KeyCode {
     K_UNKNOWN             = 0x0, // *DEFAULT* (flag used in auto file gen to signal default/unknown keycode)
     
+    // white space keys
     K_Tab                 = SELECT_KEY( KEY_TAB,                    VK_TAB ),
     K_Space               = SELECT_KEY( KEY_SPACE,                  VK_SPACE ),
     K_Return              = SELECT_KEY( KEY_ENTER,                  VK_RETURN ),
@@ -37,7 +38,8 @@ enum KeyCode {
     K_LShift              = SELECT_KEY( KEY_LEFTSHIFT,              VK_LSHIFT ),
     K_RShift              = SELECT_KEY( KEY_RIGHTSHIFT,             VK_RSHIFT ),
     K_Capital             = SELECT_KEY( KEY_CAPSLOCK,               VK_CAPITAL ),
-
+    
+    // Control keys
     K_Escape              = SELECT_KEY( KEY_ESC,                    VK_ESCAPE ),
     K_Control             = SELECT_KEY( KEY_LEFTCTRL,               VK_CONTROL ),
     K_LControl            = SELECT_KEY( KEY_LEFTCTRL,               VK_LCONTROL ),
@@ -45,11 +47,11 @@ enum KeyCode {
     K_Menu                = SELECT_KEY( KEY_MENU,                   VK_MENU ), // Todo check if this is right. Does windows use menue for alt?
     K_LWindows            = SELECT_KEY( KEY_LEFTMETA,               VK_LWIN ),
     K_RWindows            = SELECT_KEY( KEY_RIGHTMETA,              VK_RWIN ),
-
     K_Alt                 = SELECT_KEY( KEY_LEFTALT,                VK_MENU ),
     K_LAlt                = SELECT_KEY( KEY_LEFTALT,                VK_LMENU ),
     K_RAlt                = SELECT_KEY( KEY_RIGHTALT,               VK_RMENU ),
     
+    // Editing keys
     K_PageUp              = SELECT_KEY( KEY_PAGEUP,                 VK_PRIOR ),
     K_PageDown            = SELECT_KEY( KEY_PAGEDOWN,               VK_NEXT ),
     K_End                 = SELECT_KEY( KEY_END,                    VK_END ),
@@ -57,17 +59,19 @@ enum KeyCode {
     K_Select              = SELECT_KEY( KEY_SELECT,                 VK_SELECT ),
     K_Insert              = SELECT_KEY( KEY_INSERT,                 VK_INSERT ),
 
+    // 
     K_Print               = SELECT_KEY( KEY_PRINT,                  VK_PRINT ),
     K_Execute             = SELECT_KEY( 0,                          VK_EXECUTE ), // TODO: find replacement and if not do we need this key
     K_Snapshot            = SELECT_KEY( KEY_SELECTIVE_SCREENSHOT,   VK_SNAPSHOT ), // TODO: Check if this is right conversion
     K_Help                = SELECT_KEY( KEY_HELP,                   VK_HELP ),
 
+    // Cursor movement keys
     K_Left                = SELECT_KEY( KEY_LEFT,                   VK_LEFT ),
     K_Up                  = SELECT_KEY( KEY_UP,                     VK_UP ),
     K_Right               = SELECT_KEY( KEY_RIGHT,                  VK_RIGHT ),
     K_Down                = SELECT_KEY( KEY_DOWN,                   VK_DOWN ),
 
-
+    // Alphanumeric keys
     K_0                   = SELECT_KEY( KEY_0,                      '0' ),
     K_1                   = SELECT_KEY( KEY_1,                      '1' ),
     K_2                   = SELECT_KEY( KEY_2,                      '2' ),
@@ -105,18 +109,34 @@ enum KeyCode {
     K_Y                   = SELECT_KEY( KEY_Y,                      'Y' ),
     K_Z                   = SELECT_KEY( KEY_Z,                      'Z' ),
 
+    // Special character keys
+    // (note the naming convention is based on US keyboard layout,
+    //  K_<non shifted char>_<shifted char>)
+    K_Semicolon_Colon     = SELECT_KEY( KEY_SEMICOLON,              VK_OEM_1 ), // ';:' for US
+    K_Plus_Equal          = SELECT_KEY( KEY_EQUAL,                  VK_OEM_PLUS ), // '+' any country
+    K_Comma_LAngleBracket           = SELECT_KEY( KEY_COMMA,                VK_OEM_COMMA ),   // ',' any country
+    K_Minus_Underscore              = SELECT_KEY( KEY_MINUS,                VK_OEM_MINUS ),   // '-' any country
+    K_Period_RAngleBracket          = SELECT_KEY( KEY_DOT,                  VK_OEM_PERIOD ),   // '.' any country
+    K_ForwardSlash_QuestionMark     = SELECT_KEY( KEY_SLASH,                VK_OEM_2 ),   // '/?' for US
+    K_Grave_Tilde                   = SELECT_KEY( KEY_GRAVE,                VK_OEM_3 ),   // '`~' for US
+    K_LSquareBracket_LCurlyBracket  = SELECT_KEY( KEY_LEFTBRACE,            VK_OEM_4 ),  //  '[{' for US
+    K_Backslash_Pipe                = SELECT_KEY( KEY_BACKSLASH,            VK_OEM_5 ),  //  '\|' for US
+    K_RSquareBracket_RCurlyBracket  = SELECT_KEY( KEY_RIGHTBRACE,           VK_OEM_6 ),  //  ']}' for US
+    K_SingleQuote_DoubleQuote       = SELECT_KEY( KEY_APOSTROPHE,           VK_OEM_7 ),  //  ''"' for US
+
 
     K_Apps                = SELECT_KEY( KEY_APPSELECT,              VK_APPS ), // TODO: Confirm
     K_Sleep               = SELECT_KEY( KEY_SLEEP,                  VK_SLEEP ),
 
 
+    // Mouse keys
     K_Scroll              = SELECT_KEY( BTN_MIDDLE,                 VK_SCROLL ), // TODO: IDK what the key is supposed to be doing
     K_ScrollUp            = SELECT_KEY( KEY_SCROLLUP,               VK_SCROLL ), // TODO: What is the difference between scroll up and down? is it the actual scroll wheel rotating?
     K_ScrollDown          = SELECT_KEY( KEY_SCROLLDOWN,             VK_SCROLL ),
     K_LeftMouse           = SELECT_KEY( BTN_LEFT,                   VK_LBUTTON ),
     K_RightMouse          = SELECT_KEY( BTN_RIGHT,                  VK_RBUTTON ),
 
-
+    // Numpad keys
     K_Numpad0             = SELECT_KEY( KEY_NUMERIC_0,              VK_NUMPAD0 ),
     K_Numpad1             = SELECT_KEY( KEY_NUMERIC_1,              VK_NUMPAD1 ),
     K_Numpad2             = SELECT_KEY( KEY_NUMERIC_2,              VK_NUMPAD2 ),
@@ -132,6 +152,10 @@ enum KeyCode {
     K_Subtract            = SELECT_KEY( KEY_KPMINUS,                VK_SUBTRACT ),
     K_Decimal             = SELECT_KEY( KEY_KPDOT,                  VK_DECIMAL ),
     K_Divide              = SELECT_KEY( KEY_KPSLASH,                VK_DIVIDE ),
+    K_Equal               = SELECT_KEY( 0,                          VK_OEM_NEC_EQUAL ), // '=' key on numpad // TODO: what is numpad equal equivilant
+    K_Numlock             = SELECT_KEY( KEY_NUMLOCK,                VK_NUMLOCK ),
+    
+    // Function keys
     K_F1                  = SELECT_KEY( KEY_F1,                     VK_F1 ),
     K_F2                  = SELECT_KEY( KEY_F2,                     VK_F2 ),
     K_F3                  = SELECT_KEY( KEY_F3,                     VK_F3 ),
@@ -156,20 +180,9 @@ enum KeyCode {
     K_F22                 = SELECT_KEY( KEY_F22,                    VK_F22 ),
     K_F23                 = SELECT_KEY( KEY_F23,                    VK_F23 ),
     K_F24                 = SELECT_KEY( KEY_F24,                    VK_F24 ),
-    K_Numlock             = SELECT_KEY( KEY_NUMLOCK,                VK_NUMLOCK ),
-    K_Equal               = SELECT_KEY( 0,                          VK_OEM_NEC_EQUAL ), // '=' key on numpad // TODO: what is numpad equal equivilant
-    K_Semicolon_Colon     = SELECT_KEY( KEY_SEMICOLON,              VK_OEM_1 ), // ';:' for US
-    K_Plus_Equal          = SELECT_KEY( KEY_EQUAL,                  VK_OEM_PLUS ), // '+' any country
-    K_Comma_LAngleBracket           = SELECT_KEY( KEY_COMMA,                VK_OEM_COMMA ),   // ',' any country
-    K_Minus_Underscore              = SELECT_KEY( KEY_MINUS,                VK_OEM_MINUS ),   // '-' any country
-    K_Period_RAngleBracket          = SELECT_KEY( KEY_DOT,                  VK_OEM_PERIOD ),   // '.' any country
-    K_ForwardSlash_QuestionMark     = SELECT_KEY( KEY_SLASH,                VK_OEM_2 ),   // '/?' for US
-    K_Grave_Tilde                   = SELECT_KEY( KEY_GRAVE,                VK_OEM_3 ),   // '`~' for US
-    K_LSquareBracket_LCurlyBracket  = SELECT_KEY( KEY_LEFTBRACE,            VK_OEM_4 ),  //  '[{' for US
-    K_Backslash_Pipe                = SELECT_KEY( KEY_BACKSLASH,            VK_OEM_5 ),  //  '\|' for US
-    K_RSquareBracket_RCurlyBracket  = SELECT_KEY( KEY_RIGHTBRACE,           VK_OEM_6 ),  //  ']}' for US
-    K_SingleQuote_DoubleQuote       = SELECT_KEY( KEY_APOSTROPHE,           VK_OEM_7 ),  //  ''"' for US
-
+    
+    
+    
 
 };
 
