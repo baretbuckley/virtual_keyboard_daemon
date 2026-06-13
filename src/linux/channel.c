@@ -184,7 +184,7 @@ int recieveMessage(struct ServerChannel *channel, struct SerialMessage *msg) {
         fprintf(stderr, "Warning revieved message larger than capacity\n");
     }
     while (curLen < expectedLen) {
-        int readCnt = read(channel->connFd, channel->msgBuffer + curLen, channel->msgCapacity);
+        int readCnt = read(channel->connFd, channel->msgBuffer + curLen, channel->msgCapacity - curLen);
         if (readCnt <= 0) {
             if (readCnt == 0) {
                 fprintf(stderr, "Channel disconnected before end of message\n");

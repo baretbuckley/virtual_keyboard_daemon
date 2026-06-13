@@ -9,8 +9,8 @@ const char* keycodeAsString(enum KeyCode code) {
         case K_LShift:             return "LShift";
         case K_RShift:             return "RShift";
         case K_Control:            return "Control";
-        case K_ControlLeft:        return "ControlLeft";
-        case K_ControlRight:       return "ControlRight";
+        case K_LControl:           return "ControlLeft";
+        case K_RControl:           return "ControlRight";
         case K_Menu:               return "Menu";
         // case K_LMenu:              return "LMenu";
         // case K_RMenu:              return "RMenu";
@@ -68,8 +68,8 @@ const char* keycodeAsString(enum KeyCode code) {
         case K_X:                  return "X";
         case K_Y:                  return "Y";
         case K_Z:                  return "Z";
-        case K_LeftWindows:        return "LeftWindows";
-        case K_RightWindows:       return "RightWindows";
+        case K_LWindows:           return "LeftWindows";
+        case K_RWindows:           return "RightWindows";
         case K_Apps:               return "Apps";
         case K_Sleep:              return "Sleep";
         case K_Numpad0:            return "Numpad0";
@@ -114,7 +114,7 @@ const char* keycodeAsString(enum KeyCode code) {
         case K_Numlock:            return "Numlock";
         case K_Scroll:             return "Scroll";
         case K_Equal:              return "Equal";
-        case K_Colon_Semicolon:    return "Colon_Semicolon";
+        case K_Semicolon_Colon:    return "Colon_Semicolon";
         case K_Plus_Equal:         return "Plus_Equal";
         case K_Comma_LAngleBracket:            return "Comma_LAngleBracket";
         case K_Minus_Underscore:               return "Minus_Underscore";
@@ -159,8 +159,8 @@ enum KeyCode charToKeyCode(char c, int *shifted) {
             case '-': code = K_Minus_Underscore; break; 
             case '.': code = K_Period_RAngleBracket; break; 
             case '/': code = K_ForwardSlash_QuestionMark; break; 
-            case ':': code = K_Colon_Semicolon; shift = 1; break; 
-            case ';': code = K_Colon_Semicolon; break; 
+            case ':': code = K_Semicolon_Colon; shift = 1; break; 
+            case ';': code = K_Semicolon_Colon; break; 
             case '<': code = K_Comma_LAngleBracket; shift = 1; break; 
             case '=': code = K_Plus_Equal; break; 
             case '>': code = K_Period_RAngleBracket; shift = 1; break; 

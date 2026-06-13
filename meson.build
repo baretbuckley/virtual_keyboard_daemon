@@ -20,12 +20,12 @@ deps = []
 
 if build_machine.system() == 'windows'
   shared_src += ['src/windows/channel.c', 'src/windows/keycode.c']
-  daemon_src += ['src/windows/virtual_keyboard.c']
+  daemon_src += ['src/windows/virtual_keyboard.c', 'src/windows/daemonize.c']
   
 
 elif build_machine.system() == 'linux'
   shared_src += ['src/linux/channel.c', 'src/linux/keycode.c']
-  daemon_src += ['src/linux/virtual_keyboard.c']
+  daemon_src += ['src/linux/virtual_keyboard.c', 'src/linux/daemonize.c']
   tool_src += ['src/linux/keycode.c']
   deps += [dependency('libsystemd')]
 endif
@@ -51,10 +51,10 @@ executable('vkey',
            include_directories : incdir,
            install : true)
 
-executable('vkeytool',
-           ['src/vkeytool/vkeytool.c'] + tool_src,
-           include_directories: incdir,
-           install : true)
+# executable('vkeytool',
+#            ['src/vkeytool/vkeytool.c'] + tool_src,
+#            include_directories: incdir,
+#            install : true)
 
 
 if build_machine.system() == 'linux'

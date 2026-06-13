@@ -5,15 +5,17 @@
 
 
 struct ServerChannel {
-    struct SerialMessage msgBuffer;
+    unsigned char *msgBuffer;
+    unsigned int msgCapacity;
     HANDLE pipe;
     BOOL connected;
+    BOOL bufferOwned; // If the memory in msgBuffer is owned and must be later freed
     char pipePath[256];
 };
 
 struct ClientChannel {
-    char *pipePath;
     HANDLE pipe;
+    char pipePath[256];
     BOOL connected;
 };
 
@@ -35,18 +37,26 @@ int reopenChannel(struct ServerChannel *channel) {
     return 0;
 }
 
-struct ServerChannel *createChannel(const char *name) {
+struct ServerChannel *createChannel(const char *name, unsigned char *buffer, unsigned int len) {
     struct ServerChannel *server = malloc(sizeof(struct ServerChannel));
-
-    server->msgBuffer = initSerialMsgCapacity(CHANNEL_BUFFER_SIZE);
 
     sprintf(&server->pipePath, "\\\\.\\pipe\\%s", name);
 
     if (reopenChannel(server) == -1) {
+        free(server);
         return NULL;
-    } else {
-        return server;
     }
+
+    if (buffer) {
+        server->msgBuffer = buffer;
+        server->bufferOwned = 0;
+    } else {
+        server->msgBuffer = (unsigned char*)malloc(len);
+        server->bufferOwned = 1;
+    }
+    server->msgCapacity = len;
+
+    return server;
 }
 
 int waitConnection(struct ServerChannel *channel) {
@@ -67,28 +77,77 @@ void closeChannel(struct ServerChannel *channel) {
 }
 
 
-struct SerialMessage *recieveMessage(struct ServerChannel *channel) {
+int recieveMessage(struct ServerChannel *channel, struct SerialMessage *msg) {
+    // if (!channel->connected) {
+    //     printf("Unable to recieve message, client not connected\n");
+    //     return -1;
+    // }
+    // long unsigned int read;
+
+    // if (!ReadFile(channel->pipe, channel->msgBuffer, channel->msgCapacity, &read, NULL) || read == 0) {
+    //     if (GetLastError() == ERROR_BROKEN_PIPE) {
+    //         channel->connected = FALSE;
+    //         reopenChannel(channel);
+    //         clearRetainingCapacity(&(channel->msgBuffer));
+    //         return &(channel->msgBuffer);
+    //     } else {
+    //         printf("Failed to read from pipe. Error code %li\n", GetLastError());
+    //         closeChannel(channel);
+    //         return -1;
+    //     }
+    // }
+    // if (read == 0) return -1;
+    // channel->msgBuffer.msgLen = read-4; // -4 to pop off the null terminal from the length
+    // return &(channel->msgBuffer);
+
+
+
     if (!channel->connected) {
         printf("Unable to recieve message, client not connected\n");
-        return NULL;
+        return -1;
     }
-    long unsigned int read;
-
-    if (!ReadFile(channel->pipe, channel->msgBuffer.msgBuffer, channel->msgBuffer.capacity, &read, NULL) || read == 0) {
+    unsigned int curLen = 0;
+    unsigned int readCnt;
+    if (!ReadFile(channel->pipe, channel->msgBuffer, channel->msgCapacity, &readCnt, NULL) || readCnt == 0) {
         if (GetLastError() == ERROR_BROKEN_PIPE) {
             channel->connected = FALSE;
             reopenChannel(channel);
-            clearRetainingCapacity(&(channel->msgBuffer));
-            return &(channel->msgBuffer);
+            msg->msgLen = 0;
+            return 0;
         } else {
             printf("Failed to read from pipe. Error code %li\n", GetLastError());
             closeChannel(channel);
-            return NULL;
+            return -1;
         }
     }
-    if (read == 0) return NULL;
-    channel->msgBuffer.msgLen = read-4; // -4 to pop off the null terminal from the length
-    return &(channel->msgBuffer);
+    printf("Finished read\n");
+    curLen = readCnt;
+
+    uint32_t expectedLen = *((uint32_t*)(channel->msgBuffer));
+    printf("Expected len is %i with curr msg len = %i, cap is %i\n", expectedLen, curLen, channel->msgCapacity);
+    if (expectedLen > channel->msgCapacity-4) {
+        fprintf(stderr, "Warning revieved message larger than capacity\n");
+    }
+    while (curLen < expectedLen) {
+        if (!ReadFile(channel->pipe, channel->msgBuffer + curLen, channel->msgCapacity - curLen, &readCnt, NULL) || readCnt == 0) {
+            if (GetLastError() == ERROR_BROKEN_PIPE) {
+                fprintf(stderr, "Channel disconnected before end of message\n");
+                channel->connected = FALSE;
+                closeChannel(channel);
+                return -1;
+            } else {
+                fprintf(stderr, "Failed to read from pipe. Error code %li\n", GetLastError());
+                closeChannel(channel);
+                return -1;
+            }
+        }
+        printf("Finished read\n");
+        curLen += readCnt;
+    }
+    msg->msgBuffer = channel->msgBuffer+4;
+    msg->capacity = channel->msgCapacity-4;
+    msg->msgLen = curLen-4;
+    return 0;
 
 }
 
@@ -97,7 +156,10 @@ int isClientConnected(struct ServerChannel *channel) {
 }
 
 void freeServerChannel(struct ServerChannel *channel) {
-    deinitSerialMsg(&(channel->msgBuffer));
+    if (channel->connected)
+        closeChannel(channel);
+    if (channel->bufferOwned)
+        free(channel->msgBuffer);
     free(channel);
 }
 
@@ -108,9 +170,7 @@ void freeServerChannel(struct ServerChannel *channel) {
 struct ClientChannel *openChannel(const char *name) {
     struct ClientChannel *client = malloc(sizeof(struct ClientChannel));
 
-    char *pipePath = malloc(256);
-    sprintf(pipePath, "\\\\.\\pipe\\%s", name);
-    client->pipePath = pipePath;
+    sprintf(client->pipePath, "\\\\.\\pipe\\%s", name);
 
     client->pipe = CreateFile ( 
         client->pipePath,   // pipe name  
@@ -134,24 +194,24 @@ void disconnect(struct ClientChannel *channel) {
     channel->connected = FALSE;
 }
 
-int sendMessage(struct ClientChannel *channel, struct SerialMessage msg) {
+int sendMessage(struct ClientChannel *channel, unsigned char *msg, unsigned int len) {
     if (!channel->connected) {
         printf("Unable to send message, channel not connected\n");
         return -1;
     }
     
-
+    printf("Message len is %i, %i\n", *((uint32_t*)(msg)), len);
     unsigned long written;
-    if (!WriteFile(channel->pipe, msg.msgBuffer, serialFullLen(msg), &written, NULL)) {
-        printf("Failed to write to file, error: %i \n", GetLastError());
+    if (!WriteFile(channel->pipe, msg, len, &written, NULL)) {
+        printf("Failed to write to file, error: %li \n", GetLastError());
         return -1;
     }
+    
     return written;
 }
 
 void freeClientChannel(struct ClientChannel *channel) {
     if (channel->connected)
         disconnect(channel);
-    free(channel->pipePath);
     free(channel);
 }

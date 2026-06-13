@@ -3,6 +3,8 @@
 #include <virtual_keyboard.h>
 #include <daemon_options.h>
 
+#include <daemonize.h>
+
 // #include <windows.h>
 // #include <winsock2.h>
 // #include <afunix.h>
@@ -11,31 +13,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-#include <unistd.h>
+// #include <unistd.h>
 
-#include <systemd/sd-daemon.h>
+// #include <systemd/sd-daemon.h>
 
 // #pragma comment(lib, "Ws2_32.lib")
 
-int recieve_socket() {
-    int n = sd_listen_fds(0);
-    if (n != 1) return -1;
-    int listen_fd = SD_LISTEN_FDS_START;
-    return listen_fd;
-}
+
 
 static struct KeyBoard *keyboard = NULL;
 static struct ServerChannel *channel = NULL;
 
 void cleanUp() {
     if (channel) {
-        printf("Cleaning channel\n");
-        closeChannel(channel);
+        // printf("Cleaning channel\n");
+        // closeChannel(channel);
+        printf("Freeing channel\n");
         freeServerChannel(channel);
     }
     if (keyboard) {
         deleteKeyBoard(keyboard);
     }
+    printf("finished cleanup\n");
 }
 
 void sig_int_close(int sig){
@@ -176,6 +175,7 @@ int main(int argc, const char **argv) {
         printf("Using channel name\n");
         channel = createChannel(context.channelName, msgBuffer, CHANNEL_BUFFER_SIZE);
     } else {
+#ifdef __linux__
         printf("Using default name\n");
         int fd = recieve_socket();
         if (fd < 0) {
@@ -185,6 +185,10 @@ int main(int argc, const char **argv) {
         channel = createChannelWithFD(fd, msgBuffer, CHANNEL_BUFFER_SIZE);
         usleep(100);
         sd_notify(0, "READY=1");
+#else
+        printf("Using default name\n");
+        channel = createChannel("vkeyd", msgBuffer, CHANNEL_BUFFER_SIZE);
+#endif
     }
 
 

@@ -7,33 +7,40 @@
 #include <winerror.h>
 
 #include "keycode.h"
+#include <stdint.h>
 
+#define MAX_KEYS 256
 
 struct KeyBoard {
+    uint64_t pressKeys[(MAX_KEYS + 63) / 64];
     INPUT sendBuffer[100];
 };
 
+#define SET_BIT(A, K) ( A[K/64] |= ((uint64_t)1 << (K%64)))
+#define CLEAR_BIT(A, K) ( A[K/64] &= ~((uint64_t)1 << (K%64)))
 
-KeyBoard *createKeyBoard() {
-    return malloc(sizeof(KeyBoard));
+
+struct KeyBoard *createKeyBoard() {
+    return malloc(sizeof(struct KeyBoard));
 }
-void deleteKeyBoard(KeyBoard *keyboard) {
+void deleteKeyBoard(struct KeyBoard *keyboard) {
     free(keyboard);
 }
 
-enum Result pressKey(KeyBoard *keyboard, enum KeyCode key) {
+enum Result pressKey(struct KeyBoard *keyboard, enum KeyCode key) {
     INPUT *input = (keyboard->sendBuffer);
     ZeroMemory(input, sizeof(INPUT));
     input[0].type = INPUT_KEYBOARD;
     input[0].ki.wVk = key;
     UINT uSent = SendInput(1, input, sizeof(INPUT));
     if (uSent != 1) {
-        printf("SendInput failed: 0x%x\n", HRESULT_FROM_WIN32(GetLastError()));
+        printf("SendInput failed: 0x%lx\n", HRESULT_FROM_WIN32(GetLastError()));
     }
+    SET_BIT(keyboard->pressKeys, key);
     return Success;
 }
 
-enum Result releaseKey(KeyBoard *keyboard, enum KeyCode key) {
+enum Result releaseKey(struct KeyBoard *keyboard, enum KeyCode key) {
     INPUT *input = (keyboard->sendBuffer);
     ZeroMemory(input, sizeof(INPUT));
     input[0].type = INPUT_KEYBOARD;
@@ -41,13 +48,14 @@ enum Result releaseKey(KeyBoard *keyboard, enum KeyCode key) {
     input[0].ki.dwFlags = KEYEVENTF_KEYUP;
     UINT uSent = SendInput(1, input, sizeof(INPUT));
     if (uSent != 1) {
-        printf("SendInput failed: 0x%x\n", HRESULT_FROM_WIN32(GetLastError()));
+        printf("SendInput failed: 0x%lx\n", HRESULT_FROM_WIN32(GetLastError()));
     }
+    CLEAR_BIT(keyboard->pressKeys, key);
     return Success;
 }
 
 // void tapKey(KeyBoard *keyboard, enum KeyCode key, int delay_ms);
-enum Result tapKey(KeyBoard *keyboard, enum KeyCode key) {
+enum Result tapKey(struct KeyBoard *keyboard, enum KeyCode key) {
     printf("Sending key %s\n", keycodeAsString(key));
     INPUT *inputs = (keyboard->sendBuffer);
     ZeroMemory(inputs, sizeof(INPUT)*2);
@@ -58,22 +66,23 @@ enum Result tapKey(KeyBoard *keyboard, enum KeyCode key) {
     inputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
     UINT uSent = SendInput(2, inputs, sizeof(INPUT));
     if (uSent != 2) {
-        printf("SendInput failed: 0x%x\n", HRESULT_FROM_WIN32(GetLastError()));
+        printf("SendInput failed: 0x%lx\n", HRESULT_FROM_WIN32(GetLastError()));
     }
+    CLEAR_BIT(keyboard->pressKeys, key);
     return Success;
 }
 
 
-enum Result drainBuffer(KeyBoard *keyboard, int len) {
+enum Result drainBuffer(struct KeyBoard *keyboard, unsigned int len) {
     UINT uSent = SendInput(len, keyboard->sendBuffer, sizeof(INPUT));
     if (uSent != len) {
-        printf("SendInput failed: 0x%x\n", HRESULT_FROM_WIN32(GetLastError()));
+        printf("SendInput failed: 0x%lx\n", HRESULT_FROM_WIN32(GetLastError()));
     }
     ZeroMemory(keyboard->sendBuffer, sizeof(INPUT)*ARRAYSIZE(keyboard->sendBuffer));
     return Success;
 }
 
-int addInputPress(KeyBoard *keyboard, int pos, enum KeyCode key) {
+int addInputPress(struct KeyBoard *keyboard, int pos, enum KeyCode key) {
     keyboard->sendBuffer[pos].type = INPUT_KEYBOARD;
     keyboard->sendBuffer[pos].ki.wVk = key;
     if (pos == ARRAYSIZE(keyboard->sendBuffer)-1) {
@@ -83,7 +92,7 @@ int addInputPress(KeyBoard *keyboard, int pos, enum KeyCode key) {
     return ++pos;
 }
 
-int addInputRelease(KeyBoard *keyboard, int pos, enum KeyCode key) {
+int addInputRelease(struct KeyBoard *keyboard, int pos, enum KeyCode key) {
     keyboard->sendBuffer[pos].type = INPUT_KEYBOARD;
     keyboard->sendBuffer[pos].ki.wVk = key;
     keyboard->sendBuffer[pos].ki.dwFlags = KEYEVENTF_KEYUP;
@@ -96,7 +105,7 @@ int addInputRelease(KeyBoard *keyboard, int pos, enum KeyCode key) {
 
 
 
-enum Result typeString(KeyBoard *keyboard, const char* str) {
+enum Result typeString(struct KeyBoard *keyboard, const char* str, unsigned int delay) {
     int pos = 0; // current possition in buffer for filling
     ZeroMemory(keyboard->sendBuffer, sizeof(INPUT)*ARRAYSIZE(keyboard->sendBuffer));
     INPUT *inputBuf = keyboard->sendBuffer;
@@ -115,6 +124,8 @@ enum Result typeString(KeyBoard *keyboard, const char* str) {
 
         pos = addInputPress(keyboard, pos, key);
         pos = addInputRelease(keyboard, pos, key);
+        if (delay)
+            Sleep(delay*1000);
     }
     if (shift)
         pos = addInputRelease(keyboard, pos, K_Shift);
@@ -123,3 +134,15 @@ enum Result typeString(KeyBoard *keyboard, const char* str) {
     return Success;
 }
 
+
+void releaseAllKeys(struct KeyBoard *keyboard) {
+    for (unsigned int i = 0; i < MAX_KEYS / 64; i++) {
+        if (keyboard->pressKeys[i] == 0)
+            continue;
+        for (uint64_t j = 0; j < 64; j++) {
+            if (keyboard->pressKeys[i] & ((uint64_t)1 << j)) {
+                releaseKey(keyboard, i*64 + j);
+            }
+        }
+    }
+}

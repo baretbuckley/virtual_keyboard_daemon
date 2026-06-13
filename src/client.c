@@ -12,8 +12,11 @@ unsigned char buffer[CHANNEL_BUFFER_SIZE]; // Message buffer used in the serial 
 
 void cleanUp() {
     if (channel) {
+        printf("Disconnecting\n");
         disconnect(channel);
+        printf("Freeing channel\n");
         freeClientChannel(channel);
+        printf("finished cleanup\n");
     }
 }
 
