@@ -51,10 +51,10 @@ executable('vkey',
            include_directories : incdir,
            install : true)
 
-executable('vkeytool',
-           ['src/vkeytool/vkeytool.c'] + tool_src,
-           include_directories: incdir,
-           install : true)
+# executable('vkeytool',
+#            ['src/vkeytool/vkeytool.c'] + tool_src,
+#            include_directories: incdir,
+#            install : true)
 
 
 if build_machine.system() == 'linux'
