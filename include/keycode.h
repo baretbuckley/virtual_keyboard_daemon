@@ -177,22 +177,29 @@ enum KeyCode {
     
     // Media and audio keys
     // Note currentl linux keys are unconfirmed
-    K_VolumeMute          = SELECT_KEY( KEY_VOLUME_MUTE,            VK_VOLUME_MUTE ),
-    K_VolumeDown          = SELECT_KEY( KEY_VOLUME_DOWN,            VK_VOLUME_DOWN ),
-    K_VolumeUp            = SELECT_KEY( KEY_VOLUME_UP,              VK_VOLUME_UP ),
-    K_MediaNext           = SELECT_KEY( KEY_MEDIA_NEXT_TRACK,       VK_MEDIA_NEXT_TRACK ),
-    K_MediaPrevTrack      = SELECT_KEY( KEY_MEDIA_PREV_TRACK,       VK_MEDIA_PREV_TRACK ),
-    K_MediaStop           = SELECT_KEY( KEY_MEDIA_STOP,             VK_MEDIA_STOP ),
-    K_MediaPlayPause      = SELECT_KEY( KEY_MEDIA_PLAY_PAUSE,       VK_MEDIA_PLAY_PAUSE ),
+    K_VolumeMute          = SELECT_KEY( KEY_MUTE,                   VK_VOLUME_MUTE ),
+    K_VolumeDown          = SELECT_KEY( KEY_VOLUMEDOWN,             VK_VOLUME_DOWN ),
+    K_VolumeUp            = SELECT_KEY( KEY_VOLUMEUP,               VK_VOLUME_UP ),
+    K_MediaNext           = SELECT_KEY( KEY_NEXTSONG,               VK_MEDIA_NEXT_TRACK ),
+    K_MediaPrevTrack      = SELECT_KEY( KEY_PREVIOUSSONG,           VK_MEDIA_PREV_TRACK ),
+    K_MediaStop           = SELECT_KEY( KEY_STOPCD,                 VK_MEDIA_STOP ),
+    K_MediaPlayPause      = SELECT_KEY( KEY_PLAYPAUSE,              VK_MEDIA_PLAY_PAUSE ),
 
     // Browser keys
-    K_BrowserBack        = SELECT_KEY( 0,                          VK_BROWSER_BACK ),
-    K_BrowserForward     = SELECT_KEY( 0,                          VK_BROWSER_FORWARD ),
-    K_BrowserRefresh     = SELECT_KEY( 0,                          VK_BROWSER_REFRESH ),
-    K_BrowserStop        = SELECT_KEY( 0,                          VK_BROWSER_STOP ),
-    K_BrowserSearch      = SELECT_KEY( 0,                          VK_BROWSER_SEARCH ),
-    K_BrowserFavorites   = SELECT_KEY( 0,                          VK_BROWSER_FAVORITES ),
-    K_BrowserHome        = SELECT_KEY( 0,                          VK_BROWSER_HOME ),
+    K_BrowserBack         = SELECT_KEY( 0,                          VK_BROWSER_BACK ),
+    K_BrowserForward      = SELECT_KEY( KEY_ALL_APPLICATIONS,                          VK_BROWSER_FORWARD ),
+    K_BrowserStop         = SELECT_KEY( 0,                          VK_BROWSER_STOP ),
+    K_BrowserSearch       = SELECT_KEY( KEY_FIND,                          VK_BROWSER_SEARCH ),
+    
+    K_BrowserRefresh      = SELECT_KEY( KEY_REFRESH,                 VK_BROWSER_REFRESH ),
+    K_BrowserFavorites    = SELECT_KEY( KEY_FAVORITES,                          VK_BROWSER_FAVORITES ),
+    K_BrowserHome         = SELECT_KEY( KEY_HOMEPAGE,                          VK_BROWSER_HOME ),
+    K_Browser             = SELECT_KEY( KEY_WWW,                     0 ),
+    // K_Search              = SELECT_KEY( KEY_SEARCH,                 0),
+
+    K_ZoomIn              = SELECT_KEY( KEY_ZOOMIN, 0 ),
+    K_ZoomOut             = SELECT_KEY( KEY_ZOOMOUT, 0 ),
+    K_ZoomReset           = SELECT_KEY( KEY_ZOOMRESET, 0 ),
 
     // Msc keys
     K_Print               = SELECT_KEY( KEY_PRINT,                  VK_PRINT ),

@@ -11,20 +11,20 @@ const char* keycodeAsString(enum KeyCode code) {
         case K_Delete: return "Delete";
         case K_BackSpace: return "BackSpace";
         case K_Shift: return "Shift";
-        case K_LShift: return "LShift";
+        // case K_LShift: return "LShift";
         case K_RShift: return "RShift";
         case K_Capital: return "Capital";
     
         // Control keys
         case K_Escape: return "Escape";
         case K_Control: return "Control";
-        case K_LControl: return "LControl";
+        // case K_LControl: return "LControl";
         case K_RControl: return "RControl";
         case K_Menu: return "Menu";
         case K_LWindows: return "LWindows";
         case K_RWindows: return "RWindows";
         case K_Alt: return "Alt";
-        case K_LAlt: return "LAlt";
+        // case K_LAlt: return "LAlt";
         case K_RAlt: return "RAlt";
     
         // Editing keys
@@ -117,7 +117,7 @@ const char* keycodeAsString(enum KeyCode code) {
         case K_Subtract: return "Subtract";
         case K_Decimal: return "Decimal";
         case K_Divide: return "Divide";
-        case K_Equal: return "Equal";
+        // case K_Equal: return "Equal";
         case K_Numlock: return "Numlock";
     
         // Function keys
@@ -159,18 +159,18 @@ const char* keycodeAsString(enum KeyCode code) {
 
 
         // Browser keys
-        case K_BrowserBack: return "BrowserBack";
-        case K_BrowserForward: return "BrowserForward";
+        // case K_BrowserBack: return "BrowserBack";
+        // case K_BrowserForward: return "BrowserForward";
         case K_BrowserRefresh: return "BrowserRefresh";
-        case K_BrowserStop: return "BrowserStop";
-        case K_BrowserSearch: return "BrowserSearch";
-        case K_BrowserFavorites: return "BrowserFavorites";
-        case K_BrowserHome: return "BrowserHome";
+        // case K_BrowserStop: return "BrowserStop";
+        // case K_BrowserSearch: return "BrowserSearch";
+        // case K_BrowserFavorites: return "BrowserFavorites";
+        // case K_BrowserHome: return "BrowserHome";
 
 
         // Msc keys
         case K_Print: return "Print"; 
-        case K_Execute: return "Execute"; 
+        // case K_Execute: return "Execute"; 
         case K_Snapshot: return "Snapshot"; 
         case K_Help: return "Help"; 
         case K_Apps: return "Apps"; 

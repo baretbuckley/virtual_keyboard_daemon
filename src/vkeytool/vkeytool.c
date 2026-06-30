@@ -3,7 +3,7 @@
 #if defined(_WIN32) || defined(_WIN64)
     #include "windows.c/key_reader.c"
 #elif defined(__linux__)
-    #include "linux.c/key_reader.c"
+    #include "linux/key_reader.c"
 #else
     #error "Unsupported platform"
 #endif

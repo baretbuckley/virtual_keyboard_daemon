@@ -269,6 +269,80 @@ enum KeyCode keycodeFromString(const char *keyName) {
         }
       default: return K_UNKNOWN;
       }
+    case 'r':
+      switch (keyName[2]) {
+      case 'o':
+        switch (keyName[3]) {
+        case 'w':
+          switch (keyName[4]) {
+          case 's':
+            switch (keyName[5]) {
+            case 'e':
+              switch (keyName[6]) {
+              case 'r':
+                switch (keyName[7]) {
+                case 'B':
+                  if (!strcmp(&keyName[8], "ack")) {
+                    return K_BrowserBack;
+                  } else {
+                    return K_UNKNOWN;
+                  }
+                case 'F':
+                  switch (keyName[8]) {
+                  case 'o':
+                    if (!strcmp(&keyName[9], "rward")) {
+                      return K_BrowserForward;
+                    } else {
+                      return K_UNKNOWN;
+                    }
+                  case 'a':
+                    if (!strcmp(&keyName[9], "vorites")) {
+                      return K_BrowserFavorites;
+                    } else {
+                      return K_UNKNOWN;
+                    }
+                  default: return K_UNKNOWN;
+                  }
+                case 'R':
+                  if (!strcmp(&keyName[8], "efresh")) {
+                    return K_BrowserRefresh;
+                  } else {
+                    return K_UNKNOWN;
+                  }
+                case 'S':
+                  switch (keyName[8]) {
+                  case 't':
+                    if (!strcmp(&keyName[9], "op")) {
+                      return K_BrowserStop;
+                    } else {
+                      return K_UNKNOWN;
+                    }
+                  case 'e':
+                    if (!strcmp(&keyName[9], "arch")) {
+                      return K_BrowserSearch;
+                    } else {
+                      return K_UNKNOWN;
+                    }
+                  default: return K_UNKNOWN;
+                  }
+                case 'H':
+                  if (!strcmp(&keyName[8], "ome")) {
+                    return K_BrowserHome;
+                  } else {
+                    return K_UNKNOWN;
+                  }
+                default: return K_UNKNOWN;
+                }
+              default: return K_UNKNOWN;
+              }
+            default: return K_UNKNOWN;
+            }
+          default: return K_UNKNOWN;
+          }
+        default: return K_UNKNOWN;
+        }
+      default: return K_UNKNOWN;
+      }
     case '\0': return K_B;
     default: return K_UNKNOWN;
     }

@@ -13,12 +13,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-// #include <unistd.h>
+#include <unistd.h>
 
 // #include <systemd/sd-daemon.h>
 
 // #pragma comment(lib, "Ws2_32.lib")
 
+
+#ifdef __linux__
+#include <systemd/sd-daemon.h>
+
+int getFD() {
+    int n = sd_listen_fds(0);
+    if (n != 1) return -1;
+    int listen_fd = SD_LISTEN_FDS_START;
+    return listen_fd;
+}
+
+#endif
 
 
 static struct KeyBoard *keyboard = NULL;
@@ -177,7 +189,7 @@ int main(int argc, const char **argv) {
     } else {
 #ifdef __linux__
         printf("Using default name\n");
-        int fd = recieve_socket();
+        int fd = getFD();
         if (fd < 0) {
             cleanUp();
             return -1;
