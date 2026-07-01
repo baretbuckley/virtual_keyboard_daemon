@@ -33,7 +33,7 @@ int getFD() {
 #endif
 
 
-static struct KeyBoard *keyboard = NULL;
+static struct KeyBoard keyboard = {};
 static struct ServerChannel channel = {};
 
 void cleanUp() {
@@ -43,9 +43,7 @@ void cleanUp() {
         // printf("Freeing channel\n");
         // freeServerChannel(channel);
     // }
-    if (keyboard) {
-        deleteKeyBoard(keyboard);
-    }
+    deinitKeyBoard(&keyboard);
     printf("finished cleanup\n");
 }
 
@@ -82,25 +80,25 @@ enum ExtractResult executeMsg(struct SerialExtractor *extractor) {
     printf("Extracted message\n");
     switch (msg.type) {
         case M_Type:
-            typeString(keyboard, msg.msg.str, 0);
+            typeString(&keyboard, msg.msg.str, 0);
             break;
         case M_TypeDelay:
-            typeString(keyboard, msg.msg.str, msg.delay);
+            typeString(&keyboard, msg.msg.str, msg.delay);
             break;
         case M_Press:
-            tapKey(keyboard, msg.msg.key);
+            tapKey(&keyboard, msg.msg.key);
             break;
         case M_Hold:
-            pressKey(keyboard, msg.msg.key);
+            pressKey(&keyboard, msg.msg.key);
             break;
         case M_Release:
-            releaseKey(keyboard, msg.msg.key);
+            releaseKey(&keyboard, msg.msg.key);
             break;
         case M_PressFor:
             printf("Pressing %s with a delay of %i\n", keycodeAsString(msg.msg.key), msg.delay);
-            pressKey(keyboard, msg.msg.key);
+            pressKey(&keyboard, msg.msg.key);
             usleep(msg.delay*1000);
-            releaseKey(keyboard, msg.msg.key);
+            releaseKey(&keyboard, msg.msg.key);
             break;
         case M_Delay:
             usleep(msg.delay*1000);
@@ -162,10 +160,7 @@ int main(int argc, const char **argv) {
 
     struct SerialMessage msgRef;
 
-
-    keyboard = createKeyBoard();
-
-    if (!keyboard) {
+    if (initKeyBoard(&keyboard) != 0) {
         printf("Failed to create virtual keyboard\n");
         return -1;
     }
@@ -243,7 +238,7 @@ int main(int argc, const char **argv) {
             switch (res) {
                 case ER_CloseServer:
                     printf("Closing server\n");
-                    releaseAllKeys(keyboard);
+                    releaseAllKeys(&keyboard);
                     cleanUp();
                     return 0;
                 case ER_EndOfInput:
@@ -253,7 +248,7 @@ int main(int argc, const char **argv) {
                     break;
             }
 
-            releaseAllKeys(keyboard);
+            releaseAllKeys(&keyboard);
 
             printf("serial message length: %i\n", msgRef.msgLen);
             printSerialMsg(msgRef);

@@ -3,7 +3,19 @@
 
 #include "keycode.h"
 
-struct KeyBoard;
+#include <stdint.h>
+
+// TODO the max keys currently isn't accurate, should be tailored to specific os
+#define MAX_KEYS 256
+
+struct KeyBoard {
+#ifdef __linux__
+    uint64_t pressKeys[(MAX_KEYS + 63) / 64];
+    int fd;
+#elif defined(_WIN32) || defined(_WIN64)
+    
+#endif
+};
 
 enum Result {
     Success = 0,
@@ -21,8 +33,8 @@ struct Event {
     enum Action keyAction;
 };
 
-struct KeyBoard *createKeyBoard();
-void deleteKeyBoard(struct KeyBoard *keyboard);
+int initKeyBoard(struct KeyBoard *keyboard);
+void deinitKeyBoard(struct KeyBoard *keyboard);
 
 enum Result pressKey(struct KeyBoard *keyboard, enum KeyCode key);
 
