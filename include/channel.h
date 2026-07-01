@@ -3,8 +3,36 @@
 
 #include "message.h"
 
-struct ClientChannel;
-struct ServerChannel;
+#ifdef __linux__
+#include <sys/socket.h>
+#include <sys/un.h>
+
+#elif defined(_WIN32) || defined(_WIN64)
+
+#endif
+
+struct ClientChannel {
+#ifdef __linux__
+    struct sockaddr_un address;
+    int fd;
+    unsigned char connected;
+#elif defined(_WIN32) || defined(_WIN64)
+    
+#endif
+};
+struct ServerChannel{
+#ifdef __linux__
+    struct sockaddr_un address;
+    unsigned char *msgBuffer;
+    unsigned int msgCapacity;
+    int fd;
+    int connFd; 
+    unsigned char connected;
+    unsigned char bufferOwned; // If the memory in msgBuffer is owned and must be later freed
+#elif defined(_WIN32) || defined(_WIN64)
+
+#endif
+};
 
 // Defined here for shared access between backends
 #define CHANNEL_BUFFER_SIZE 2048
@@ -13,12 +41,12 @@ struct ServerChannel;
 
 // Server Side API
 
-struct ServerChannel *createChannel(const char *name, unsigned char *buffer, unsigned int len);
+int createChannel(struct ServerChannel *handle, const char *name, unsigned char *buffer, unsigned int len);
 
 #ifdef __linux__
-struct ServerChannel *createChannelWithPath(const char *path, unsigned char *buffer, unsigned int len);
+int createChannelWithPath(struct ServerChannel *handle, const char *path, unsigned char *buffer, unsigned int len);
 
-struct ServerChannel *createChannelWithFD(int fd, unsigned char *buffer, unsigned int len);
+int createChannelWithFD(struct ServerChannel *handle, int fd, unsigned char *buffer, unsigned int len);
 #endif
 
 void closeChannel(struct ServerChannel *channel);
@@ -40,10 +68,10 @@ void freeServerChannel(struct ServerChannel *channel);
 
 // Client Side API
 
-struct ClientChannel *openChannel(const char *name);
+int openChannel(struct ClientChannel *handle, const char *name);
 
 #ifdef __linux__
-struct ClientChannel *openChannelWithPath(const char *path);
+int openChannelWithPath(struct ClientChannel *handle, const char *path);
 #endif
 
 void disconnect(struct ClientChannel *channel);

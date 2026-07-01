@@ -6,41 +6,45 @@
 #include <string.h>
 // #include <windows.h>
 
-struct ClientChannel *channel;
+struct ClientChannel channel;
 unsigned char buffer[CHANNEL_BUFFER_SIZE]; // Message buffer used in the serial message
 
 
 void cleanUp() {
-    if (channel) {
+    // if (channel) {
         printf("Disconnecting\n");
-        disconnect(channel);
-        printf("Freeing channel\n");
-        freeClientChannel(channel);
+        disconnect(&channel);
+        // printf("Freeing channel\n");
+        // freeClientChannel(channel);
         printf("finished cleanup\n");
-    }
+    // }
 }
 
-void initChannel(const struct ClientOptContext *clientContext) {
+int initChannel(const struct ClientOptContext *clientContext) {
     // open channel based on result of client options
     // channelPath (on linux) ->     <channelPath>
     // channelName ->                <DEFAULT PREFIX>/<channelName>
     // neither ->                    <DEFAULT PREFIX>/vkeyd
 
     // Only check if channelPath is provided if it is a linux system, otherwise just check channelName
+
+    int channelInitRes = 0;
 #ifdef __linux__
     if (clientContext->channelPath != 0) {
         printf("Using channel path\n");
-        channel = openChannelWithPath(clientContext->channelPath);
+        channelInitRes = openChannelWithPath(&channel, clientContext->channelPath);
     }
     else
 #endif
     if (clientContext->channelName != 0) {
         printf("Using channel name\n");
-        channel = openChannel(clientContext->channelName);
+        channelInitRes = openChannel(&channel, clientContext->channelName);
     } else {
         printf("Using default name\n");
-        channel = openChannel("vkeyd");
+        channelInitRes = openChannel(&channel, "vkeyd");
     }
+
+    return channelInitRes;
 
 }
 
@@ -71,7 +75,7 @@ int appendMessage(struct Message msg, struct SerialMessage *smsg) {
         if (serialMsgLen(*smsg) > 0) {
         
             // Send what is currently in the buffer and clear it
-            if (sendSerialMessage(channel, buffer, *smsg)) {
+            if (sendSerialMessage(&channel, buffer, *smsg)) {
                 cleanUp();
                 return -1;
             }
@@ -101,7 +105,7 @@ int appendMessage(struct Message msg, struct SerialMessage *smsg) {
                     return -1;
                 }
 
-                if (sendSerialMessage(channel, buffer, *smsg)) {
+                if (sendSerialMessage(&channel, buffer, *smsg)) {
                     cleanUp();
                     return -1;
                 }
@@ -246,8 +250,7 @@ int main(int argc, char** argv) {
 #endif
 
     // Initialize the channel based on the client context
-    initChannel(&clientContext);
-    if (channel == NULL) {
+    if (initChannel(&clientContext) != 0) {
         printf("Failed to open channel\n");
         cleanUp();
         return -1;
@@ -448,7 +451,7 @@ int main(int argc, char** argv) {
 
 
     if (smsg.msgLen != 0) {
-        if (sendSerialMessage(channel, buffer, smsg)) {
+        if (sendSerialMessage(&channel, buffer, smsg)) {
             cleanUp();
             return -1;
         }
@@ -458,7 +461,7 @@ int main(int argc, char** argv) {
         //     freeClientChannel(channel);
         //     return -1;
         // }
-        disconnect(channel);
+        disconnect(&channel);
 
         printf("Sent message:\n");
         printSerialMsg(smsg);

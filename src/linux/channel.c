@@ -10,21 +10,21 @@
 #include <stdlib.h>
 
 
-struct ClientChannel {
-    struct sockaddr_un address;
-    int fd;
-    unsigned char connected;
-};
+// struct ClientChannel {
+//     struct sockaddr_un address;
+//     int fd;
+//     unsigned char connected;
+// };
 
-struct ServerChannel {
-    struct sockaddr_un address;
-    unsigned char *msgBuffer;
-    unsigned int msgCapacity;
-    int fd;
-    int connFd; 
-    unsigned char connected;
-    unsigned char bufferOwned; // If the memory in msgBuffer is owned and must be later freed
-};
+// struct ServerChannel {
+//     struct sockaddr_un address;
+//     unsigned char *msgBuffer;
+//     unsigned int msgCapacity;
+//     int fd;
+//     int connFd; 
+//     unsigned char connected;
+//     unsigned char bufferOwned; // If the memory in msgBuffer is owned and must be later freed
+// };
 
 #define DEFAULT_PATH_PREFIX "/tmp/"
 
@@ -57,87 +57,87 @@ int open_server_unix_socket(struct sockaddr_un *address) {
     return fd;
 }
 
-struct ServerChannel *createChannel(const char *name, unsigned char *buffer, unsigned int len) {
-    struct ServerChannel *channel = (struct ServerChannel *)malloc(sizeof(struct ServerChannel));
-    strcpy(channel->address.sun_path, DEFAULT_PATH_PREFIX);
-    strcpy(channel->address.sun_path + (sizeof(DEFAULT_PATH_PREFIX)-1), name);
+int createChannel(struct ServerChannel *handle, const char *name, unsigned char *buffer, unsigned int len) {
+    memset(handle, 0, sizeof(struct ServerChannel));
+
+    strcpy(handle->address.sun_path, DEFAULT_PATH_PREFIX);
+    strcpy(handle->address.sun_path + (sizeof(DEFAULT_PATH_PREFIX)-1), name);
     
-    channel->fd = open_server_unix_socket(&(channel->address));
-    if (channel->fd < 0) {
-        free(channel);
-        return NULL;
+    handle->fd = open_server_unix_socket(&(handle->address));
+    if (handle->fd < 0) {
+        return -1;
     }
     
     
     if (len < 16) { // 4 byte len prefix + 12 bytes for the min needed capacity to fit any message type (assumes type and typeDelay can be split as needed)
         fprintf(stderr, "Error channel buffer too small, buffer capacity must be atleast 16 bytes\n");
-        closeChannel(channel);
-        free(channel);
+        closeChannel(handle);
+        return -1;
     }
     if (buffer) {
-        channel->msgBuffer = buffer;
-        channel->bufferOwned = 0;
+        handle->msgBuffer = buffer;
+        handle->bufferOwned = 0;
     } else {
-        channel->msgBuffer = (unsigned char*)malloc(len);
-        channel->bufferOwned = 1;
+        handle->msgBuffer = (unsigned char*)malloc(len);
+        handle->bufferOwned = 1;
     }
-    channel->msgCapacity = len;
+    handle->msgCapacity = len;
 
     
-    channel->connected = 0;
-    return channel;
+    handle->connected = 0;
+    return 0;
 }
 
-struct ServerChannel *createChannelWithPath(const char *path, unsigned char *buffer, unsigned int len) {
-    struct ServerChannel *channel = (struct ServerChannel *)malloc(sizeof(struct ServerChannel));
-    strcpy(channel->address.sun_path, path);
+int createChannelWithPath(struct ServerChannel *handle, const char *path, unsigned char *buffer, unsigned int len) {
+    memset(handle, 0, sizeof(struct ServerChannel));
+    
+    strcpy(handle->address.sun_path, path);
 
-    channel->fd = open_server_unix_socket(&(channel->address));
-    if (channel->fd < 0) {
-        free(channel);
-        return NULL;
+    handle->fd = open_server_unix_socket(&(handle->address));
+    if (handle->fd < 0) {
+        return -1;
     }
     
     if (len < 16) { // 4 byte len prefix + 12 bytes for the min needed capacity to fit any message type (assumes type and typeDelay can be split as needed)
         fprintf(stderr, "Error channel buffer too small, buffer capacity must be atleast 16 bytes\n");
-        closeChannel(channel);
-        free(channel);
+        closeChannel(handle);
+        return -1;
     }
     if (buffer) {
-        channel->msgBuffer = buffer;
-        channel->bufferOwned = 0;
+        handle->msgBuffer = buffer;
+        handle->bufferOwned = 0;
     } else {
-        channel->msgBuffer = (unsigned char*)malloc(len);
-        channel->bufferOwned = 1;
+        handle->msgBuffer = (unsigned char*)malloc(len);
+        handle->bufferOwned = 1;
     }
-    channel->msgCapacity = len;
+    handle->msgCapacity = len;
     
-    channel->connected = 0;
-    return channel;
+    handle->connected = 0;
+    return 0;
 }
 
-struct ServerChannel *createChannelWithFD(int fd, unsigned char *buffer, unsigned int len) {
-    struct ServerChannel *channel = (struct ServerChannel *)malloc(sizeof(struct ServerChannel));
+int createChannelWithFD(struct ServerChannel *handle, int fd, unsigned char *buffer, unsigned int len) {
+    memset(handle, 0, sizeof(struct ServerChannel));
 
 
-    channel->fd = fd;
+    handle->fd = fd;
     
     if (len < 16) { // 4 byte len prefix + 12 bytes for the min needed capacity to fit any message type (assumes type and typeDelay can be split as needed)
         fprintf(stderr, "Error channel buffer too small, buffer capacity must be atleast 16 bytes\n");
-        closeChannel(channel);
-        free(channel);
+        closeChannel(handle);
+        return -1;
     }
     if (buffer) {
-        channel->msgBuffer = buffer;
-        channel->bufferOwned = 0;
+        handle->msgBuffer = buffer;
+        handle->bufferOwned = 0;
     } else {
-        channel->msgBuffer = (unsigned char*)malloc(len);
-        channel->bufferOwned = 1;
+        handle->msgBuffer = (unsigned char*)malloc(len);
+        handle->bufferOwned = 1;
     }
-    channel->msgCapacity = len;
+    handle->msgCapacity = len;
     
-    channel->connected = 0;
-    return channel;
+    handle->connected = 0;
+    return 0;
 }
 
 
@@ -218,39 +218,39 @@ void freeServerChannel(struct ServerChannel *channel) {
 
 
 
-struct ClientChannel *openChannel(const char *name) {
-    struct ClientChannel *channel = (struct ClientChannel *)malloc(sizeof(struct ServerChannel));
-    strcpy(channel->address.sun_path, DEFAULT_PATH_PREFIX);
-    strcpy(channel->address.sun_path + (sizeof(DEFAULT_PATH_PREFIX)-1), name);
-    channel->fd = open_af_unix_socket(&(channel->address));
+int openChannel(struct ClientChannel *handle, const char *name) {
+    memset(handle, 0, sizeof(struct ServerChannel));
+    strcpy(handle->address.sun_path, DEFAULT_PATH_PREFIX);
+    strcpy(handle->address.sun_path + (sizeof(DEFAULT_PATH_PREFIX)-1), name);
+    handle->fd = open_af_unix_socket(&(handle->address));
 
-    if (connect(channel->fd, (struct sockaddr *)&(channel->address), sizeof(struct sockaddr)+1)) {
-        fprintf(stderr, "Failed to connect to socket on Path=%s, Error: %s\n", channel->address.sun_path, strerror(errno));
-        disconnect(channel);
-        return NULL;
+    if (connect(handle->fd, (struct sockaddr *)&(handle->address), sizeof(struct sockaddr)+1)) {
+        fprintf(stderr, "Failed to connect to socket on Path=%s, Error: %s\n", handle->address.sun_path, strerror(errno));
+        disconnect(handle);
+        return -1;
     }
-    channel->connected = 1;
-    return channel;
+    handle->connected = 1;
+    return 0;
 }
 
-struct ClientChannel *openChannelWithPath(const char *path) {
-    struct ClientChannel *channel = (struct ClientChannel *)malloc(sizeof(struct ServerChannel));
-    strcpy(channel->address.sun_path, "/run/vkeyd.sock");
-    channel->fd = open_af_unix_socket(&(channel->address));
-    printf("Using path %s\n", channel->address.sun_path);
+int openChannelWithPath(struct ClientChannel *handle, const char *path) {
+    memset(handle, 0, sizeof(struct ServerChannel));
+    strcpy(handle->address.sun_path, "/run/vkeyd.sock");
+    handle->fd = open_af_unix_socket(&(handle->address));
+    printf("Using path %s\n", handle->address.sun_path);
 
     // socklen_t len =
     //     offsetof(struct sockaddr_un, sun_path) +
     //     strlen(addr.sun_path) + 1;
 
 // connect(fd, (struct sockaddr *)&addr, len);
-    if (connect(channel->fd, (struct sockaddr *)&(channel->address), sizeof(struct sockaddr_un))) {
-        fprintf(stderr, "Failed to connect to socket on Path=%s, Error: %s\n", channel->address.sun_path, strerror(errno));
-        disconnect(channel);
-        return NULL;
+    if (connect(handle->fd, (struct sockaddr *)&(handle->address), sizeof(struct sockaddr_un))) {
+        fprintf(stderr, "Failed to connect to socket on Path=%s, Error: %s\n", handle->address.sun_path, strerror(errno));
+        disconnect(handle);
+        return -1;
     }
-    channel->connected = 1;
-    return channel;
+    handle->connected = 1;
+    return 0;
 }
 
 void disconnect(struct ClientChannel *channel) {

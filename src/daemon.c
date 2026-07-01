@@ -34,15 +34,15 @@ int getFD() {
 
 
 static struct KeyBoard *keyboard = NULL;
-static struct ServerChannel *channel = NULL;
+static struct ServerChannel channel = {};
 
 void cleanUp() {
-    if (channel) {
+    // if (channel) {
         // printf("Cleaning channel\n");
-        // closeChannel(channel);
-        printf("Freeing channel\n");
-        freeServerChannel(channel);
-    }
+    closeChannel(&channel);
+        // printf("Freeing channel\n");
+        // freeServerChannel(channel);
+    // }
     if (keyboard) {
         deleteKeyBoard(keyboard);
     }
@@ -152,6 +152,7 @@ int main(int argc, const char **argv) {
 #ifndef __linux__
     if (context.channelPath) {
         fprintf(stderr, "%s: option --linux-channel-path is not available for operating systems other than linux\n", argv[0]);
+        return -1;
     }
 #endif
 
@@ -176,16 +177,19 @@ int main(int argc, const char **argv) {
     // channelName ->                <DEFAULT PREFIX>/<channelName>
     // neither ->                    <DEFAULT PREFIX>/vkeyd
     // Only check if channelPath is provided if it is a linux system, otherwise just check channelName
+
+    int channelInitRes = 0;
+
 #ifdef __linux__
     if (context.channelPath != 0) {
         printf("Using channel path\n");
-        channel = createChannelWithPath(context.channelPath, msgBuffer, CHANNEL_BUFFER_SIZE);
+        channelInitRes = createChannelWithPath(&channel, context.channelPath, msgBuffer, CHANNEL_BUFFER_SIZE);
     }
     else
 #endif
     if (context.channelName != 0) {
         printf("Using channel name\n");
-        channel = createChannel(context.channelName, msgBuffer, CHANNEL_BUFFER_SIZE);
+        channelInitRes = createChannel(&channel, context.channelName, msgBuffer, CHANNEL_BUFFER_SIZE);
     } else {
 #ifdef __linux__
         printf("Using default name\n");
@@ -194,17 +198,17 @@ int main(int argc, const char **argv) {
             cleanUp();
             return -1;
         }
-        channel = createChannelWithFD(fd, msgBuffer, CHANNEL_BUFFER_SIZE);
+        channelInitRes = createChannelWithFD(&channel, fd, msgBuffer, CHANNEL_BUFFER_SIZE);
         usleep(100);
         sd_notify(0, "READY=1");
 #else
         printf("Using default name\n");
-        channel = createChannel("vkeyd", msgBuffer, CHANNEL_BUFFER_SIZE);
+        channelInitRes = createChannel(&channel, "vkeyd", msgBuffer, CHANNEL_BUFFER_SIZE);
 #endif
     }
 
 
-    if (!channel) {
+    if (channelInitRes < 0) {
         printf("Failed to create channel\n");
         return -1;
     }
@@ -213,7 +217,7 @@ int main(int argc, const char **argv) {
 
         // Wait untill client connects 
         printf("Connecting\n");
-        if (waitConnection(channel)) {
+        if (waitConnection(&channel)) {
             printf("Failed to connect to client\n");
             cleanUp();
             return -1;
@@ -222,10 +226,10 @@ int main(int argc, const char **argv) {
 
         // While client is connects keep reading from the channel
         // If recieved "exit" shut down server
-        while (isClientConnected(channel)) {
+        while (isClientConnected(&channel)) {
             printf("Recieving message\n");
             
-            if (recieveMessage(channel, &msgRef) < 0) {
+            if (recieveMessage(&channel, &msgRef) < 0) {
                 printf("Failed to read from pipe.\n");
                 cleanUp();
                 return -1;
