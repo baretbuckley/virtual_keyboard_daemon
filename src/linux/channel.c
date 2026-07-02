@@ -223,7 +223,7 @@ void freeServerChannel(struct ServerChannel *channel) {
 
 
 int openChannel(struct ClientChannel *handle, const char *name) {
-    memset(handle, 0, sizeof(struct ServerChannel));
+    memset(handle, 0, sizeof(struct ClientChannel));
     strcpy(handle->address.sun_path, DEFAULT_PATH_PREFIX);
     strcpy(handle->address.sun_path + (sizeof(DEFAULT_PATH_PREFIX)-1), name);
     handle->fd = open_af_unix_socket(&(handle->address));
