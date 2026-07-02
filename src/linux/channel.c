@@ -144,6 +144,10 @@ int createChannelWithFD(struct ServerChannel *handle, int fd, unsigned char *buf
 void closeChannel(struct ServerChannel *channel) {
     close(channel->fd);
     unlink(channel->address.sun_path);
+    if (channel->bufferOwned && channel->msgBuffer) {
+        free(channel->msgBuffer);
+        channel->msgBuffer = NULL;
+    }
 }
 
 int waitConnection(struct ServerChannel *channel) {
