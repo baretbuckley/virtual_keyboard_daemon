@@ -13,7 +13,8 @@ struct KeyBoard {
     uint64_t pressKeys[(MAX_KEYS + 63) / 64];
     int fd;
 #elif defined(_WIN32) || defined(_WIN64)
-    
+    uint64_t pressKeys[(MAX_KEYS + 63) / 64];
+    INPUT sendBuffer[100];
 #endif
 };
 

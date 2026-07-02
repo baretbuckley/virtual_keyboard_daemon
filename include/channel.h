@@ -8,6 +8,7 @@
 #include <sys/un.h>
 
 #elif defined(_WIN32) || defined(_WIN64)
+#include <windows.h>
 
 #endif
 
@@ -17,9 +18,12 @@ struct ClientChannel {
     int fd;
     unsigned char connected;
 #elif defined(_WIN32) || defined(_WIN64)
-    
+    HANDLE pipe;
+    char pipePath[256];
+    BOOL connected;
 #endif
 };
+
 struct ServerChannel{
 #ifdef __linux__
     struct sockaddr_un address;
@@ -30,7 +34,12 @@ struct ServerChannel{
     unsigned char connected;
     unsigned char bufferOwned; // If the memory in msgBuffer is owned and must be later freed
 #elif defined(_WIN32) || defined(_WIN64)
-
+    unsigned char *msgBuffer;
+    unsigned int msgCapacity;
+    HANDLE pipe;
+    BOOL connected;
+    BOOL bufferOwned; // If the memory in msgBuffer is owned and must be later freed
+    char pipePath[256];
 #endif
 };
 

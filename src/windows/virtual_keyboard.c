@@ -11,21 +11,15 @@
 
 #define MAX_KEYS 256
 
-struct KeyBoard {
-    uint64_t pressKeys[(MAX_KEYS + 63) / 64];
-    INPUT sendBuffer[100];
-};
 
 #define SET_BIT(A, K) ( A[K/64] |= ((uint64_t)1 << (K%64)))
 #define CLEAR_BIT(A, K) ( A[K/64] &= ~((uint64_t)1 << (K%64)))
 
 
-struct KeyBoard *createKeyBoard() {
-    return malloc(sizeof(struct KeyBoard));
+int initKeyBoard(struct KeyBoard *keyboard) {
+    return 0;
 }
-void deleteKeyBoard(struct KeyBoard *keyboard) {
-    free(keyboard);
-}
+void deinitKeyBoard(struct KeyBoard *keyboard) {}
 
 enum Result pressKey(struct KeyBoard *keyboard, enum KeyCode key) {
     INPUT *input = (keyboard->sendBuffer);

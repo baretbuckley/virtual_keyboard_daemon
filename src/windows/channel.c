@@ -4,20 +4,20 @@
 #include <stdio.h>
 
 
-struct ServerChannel {
-    unsigned char *msgBuffer;
-    unsigned int msgCapacity;
-    HANDLE pipe;
-    BOOL connected;
-    BOOL bufferOwned; // If the memory in msgBuffer is owned and must be later freed
-    char pipePath[256];
-};
+// struct ServerChannel {
+//     unsigned char *msgBuffer;
+//     unsigned int msgCapacity;
+//     HANDLE pipe;
+//     BOOL connected;
+//     BOOL bufferOwned; // If the memory in msgBuffer is owned and must be later freed
+//     char pipePath[256];
+// };
 
-struct ClientChannel {
-    HANDLE pipe;
-    char pipePath[256];
-    BOOL connected;
-};
+// struct ClientChannel {
+//     HANDLE pipe;
+//     char pipePath[256];
+//     BOOL connected;
+// };
 
 int reopenChannel(struct ServerChannel *channel) {
     channel->connected = FALSE;
@@ -37,26 +37,25 @@ int reopenChannel(struct ServerChannel *channel) {
     return 0;
 }
 
-struct ServerChannel *createChannel(const char *name, unsigned char *buffer, unsigned int len) {
-    struct ServerChannel *server = malloc(sizeof(struct ServerChannel));
+int createChannel(struct ServerChannel *handle, const char *name, unsigned char *buffer, unsigned int len) {
+    memset(handle, 0, sizeof(struct ServerChannel));
 
-    sprintf(&server->pipePath, "\\\\.\\pipe\\%s", name);
+    sprintf(&handle->pipePath, "\\\\.\\pipe\\%s", name);
 
-    if (reopenChannel(server) == -1) {
-        free(server);
-        return NULL;
+    if (reopenChannel(handle) == -1) {
+        return -1;
     }
 
     if (buffer) {
-        server->msgBuffer = buffer;
-        server->bufferOwned = 0;
+        handle->msgBuffer = buffer;
+        handle->bufferOwned = 0;
     } else {
-        server->msgBuffer = (unsigned char*)malloc(len);
-        server->bufferOwned = 1;
+        handle->msgBuffer = (unsigned char*)malloc(len);
+        handle->bufferOwned = 1;
     }
-    server->msgCapacity = len;
+    handle->msgCapacity = len;
 
-    return server;
+    return 0;
 }
 
 int waitConnection(struct ServerChannel *channel) {
@@ -73,6 +72,9 @@ int waitConnection(struct ServerChannel *channel) {
 }
 
 void closeChannel(struct ServerChannel *channel) {
+    if (channel->bufferOwned && channel->msgBuffer) {
+        free(channel->msgBuffer);
+    }
     CloseHandle(channel->pipe);
 }
 
@@ -167,13 +169,14 @@ void freeServerChannel(struct ServerChannel *channel) {
 
 
 
-struct ClientChannel *openChannel(const char *name) {
-    struct ClientChannel *client = malloc(sizeof(struct ClientChannel));
+int openChannel(struct ClientChannel *handle, const char *name) {
+    memset(handle, 0, sizeof(struct ClientChannel));
 
-    sprintf(client->pipePath, "\\\\.\\pipe\\%s", name);
 
-    client->pipe = CreateFile ( 
-        client->pipePath,   // pipe name  
+    sprintf(handle->pipePath, "\\\\.\\pipe\\%s", name);
+
+    handle->pipe = CreateFile ( 
+        handle->pipePath,   // pipe name  
         GENERIC_WRITE, 
         0,              // no sharing 
         NULL,           // default security attributes
@@ -181,12 +184,12 @@ struct ClientChannel *openChannel(const char *name) {
         0,              // default attributes 
         NULL);          // no template file 
 
-    if (client->pipe == INVALID_HANDLE_VALUE) {
+    if (handle->pipe == INVALID_HANDLE_VALUE) {
         printf("Failed to open pipe, error: %li\n", GetLastError());
-        return NULL;
+        return -1;
     }
-    client->connected = TRUE;
-    return client;
+    handle->connected = TRUE;
+    return 0;
 }
 
 void disconnect(struct ClientChannel *channel) {
