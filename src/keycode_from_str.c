@@ -157,37 +157,10 @@ enum KeyCode keycodeFromString(const char *keyName) {
         return K_UNKNOWN;
       }
     case 'c':
-      switch (keyName[2]) {
-      case 'r':
-        switch (keyName[3]) {
-        case 'o':
-          switch (keyName[4]) {
-          case 'l':
-            switch (keyName[5]) {
-            case 'l':
-              switch (keyName[6]) {
-              case 'U':
-                if (!strcmp(&keyName[7], "p")) {
-                  return K_ScrollUp;
-                } else {
-                  return K_UNKNOWN;
-                }
-              case 'D':
-                if (!strcmp(&keyName[7], "own")) {
-                  return K_ScrollDown;
-                } else {
-                  return K_UNKNOWN;
-                }
-              case '\0': return K_Scroll;
-              default: return K_UNKNOWN;
-              }
-            default: return K_UNKNOWN;
-            }
-          default: return K_UNKNOWN;
-          }
-        default: return K_UNKNOWN;
-        }
-      default: return K_UNKNOWN;
+      if (!strcmp(&keyName[2], "roll")) {
+        return K_Scroll;
+      } else {
+        return K_UNKNOWN;
       }
     case 'u':
       if (!strcmp(&keyName[2], "btract")) {
@@ -303,12 +276,6 @@ enum KeyCode keycodeFromString(const char *keyName) {
                     }
                   default: return K_UNKNOWN;
                   }
-                case 'R':
-                  if (!strcmp(&keyName[8], "efresh")) {
-                    return K_BrowserRefresh;
-                  } else {
-                    return K_UNKNOWN;
-                  }
                 case 'S':
                   switch (keyName[8]) {
                   case 't':
@@ -325,12 +292,19 @@ enum KeyCode keycodeFromString(const char *keyName) {
                     }
                   default: return K_UNKNOWN;
                   }
+                case 'R':
+                  if (!strcmp(&keyName[8], "efresh")) {
+                    return K_BrowserRefresh;
+                  } else {
+                    return K_UNKNOWN;
+                  }
                 case 'H':
                   if (!strcmp(&keyName[8], "ome")) {
                     return K_BrowserHome;
                   } else {
                     return K_UNKNOWN;
                   }
+                case '\0': return K_Browser;
                 default: return K_UNKNOWN;
                 }
               default: return K_UNKNOWN;
@@ -879,8 +853,40 @@ enum KeyCode keycodeFromString(const char *keyName) {
     if (keyName[1] == '\0') return K_Y;
     else return K_UNKNOWN;
   case 'Z':
-    if (keyName[1] == '\0') return K_Z;
-    else return K_UNKNOWN;
+    switch (keyName[1]) {
+    case 'o':
+      switch (keyName[2]) {
+      case 'o':
+        switch (keyName[3]) {
+        case 'm':
+          switch (keyName[4]) {
+          case 'I':
+            if (!strcmp(&keyName[5], "n")) {
+              return K_ZoomIn;
+            } else {
+              return K_UNKNOWN;
+            }
+          case 'O':
+            if (!strcmp(&keyName[5], "ut")) {
+              return K_ZoomOut;
+            } else {
+              return K_UNKNOWN;
+            }
+          case 'R':
+            if (!strcmp(&keyName[5], "eset")) {
+              return K_ZoomReset;
+            } else {
+              return K_UNKNOWN;
+            }
+          default: return K_UNKNOWN;
+          }
+        default: return K_UNKNOWN;
+        }
+      default: return K_UNKNOWN;
+      }
+    case '\0': return K_Z;
+    default: return K_UNKNOWN;
+    }
   default: return K_UNKNOWN;
   }
 }

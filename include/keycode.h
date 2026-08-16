@@ -45,7 +45,7 @@ enum KeyCode {
     K_Control             = SELECT_KEY( KEY_LEFTCTRL,               VK_CONTROL ),
     K_LControl            = SELECT_KEY( KEY_LEFTCTRL,               VK_LCONTROL ),
     K_RControl            = SELECT_KEY( KEY_RIGHTCTRL,              VK_RCONTROL ),
-    K_Menu                = SELECT_KEY( KEY_MENU,                   VK_MENU ), // Todo check if this is right.
+    K_Menu                = SELECT_KEY( KEY_COMPOSE,                VK_MENU ), // Not sure why linux home key uses the compose keycode
     K_LWindows            = SELECT_KEY( KEY_LEFTMETA,               VK_LWIN ),
     K_RWindows            = SELECT_KEY( KEY_RIGHTMETA,              VK_RWIN ),
     K_Alt                 = SELECT_KEY( KEY_LEFTALT,                VK_MENU ),
@@ -123,9 +123,7 @@ enum KeyCode {
 
 
     // Mouse keys
-    K_Scroll              = SELECT_KEY( BTN_MIDDLE,                 VK_SCROLL ), // TODO: IDK what the key is supposed to be doing
-    K_ScrollUp            = SELECT_KEY( KEY_SCROLLUP,               VK_SCROLL ), // TODO: What is the difference between scroll up and down? is it the actual scroll wheel rotating?
-    K_ScrollDown          = SELECT_KEY( KEY_SCROLLDOWN,             VK_SCROLL ),
+    K_Scroll              = SELECT_KEY( BTN_MIDDLE,                 VK_SCROLL ),
     K_LeftMouse           = SELECT_KEY( BTN_LEFT,                   VK_LBUTTON ),
     K_RightMouse          = SELECT_KEY( BTN_RIGHT,                  VK_RBUTTON ),
 
@@ -145,7 +143,7 @@ enum KeyCode {
     K_Subtract            = SELECT_KEY( KEY_KPMINUS,                VK_SUBTRACT ),
     K_Decimal             = SELECT_KEY( KEY_KPDOT,                  VK_DECIMAL ),
     K_Divide              = SELECT_KEY( KEY_KPSLASH,                VK_DIVIDE ),
-    K_Equal               = SELECT_KEY( 0,                          VK_OEM_NEC_EQUAL ), // '=' key on numpad // TODO: what is numpad equal equivilant
+    K_Equal               = SELECT_KEY( KEY_KPEQUAL,                VK_OEM_NEC_EQUAL ), // '=' key on numpad
     K_Numlock             = SELECT_KEY( KEY_NUMLOCK,                VK_NUMLOCK ),
     
     // Function keys
@@ -187,13 +185,13 @@ enum KeyCode {
 
     // Browser keys
     K_BrowserBack         = SELECT_KEY( 0,                          VK_BROWSER_BACK ),
-    K_BrowserForward      = SELECT_KEY( KEY_ALL_APPLICATIONS,                          VK_BROWSER_FORWARD ),
+    K_BrowserForward      = SELECT_KEY( KEY_ALL_APPLICATIONS,       VK_BROWSER_FORWARD ),
     K_BrowserStop         = SELECT_KEY( 0,                          VK_BROWSER_STOP ),
-    K_BrowserSearch       = SELECT_KEY( KEY_FIND,                          VK_BROWSER_SEARCH ),
+    K_BrowserSearch       = SELECT_KEY( KEY_FIND,                   VK_BROWSER_SEARCH ),
     
-    K_BrowserRefresh      = SELECT_KEY( KEY_REFRESH,                 VK_BROWSER_REFRESH ),
-    K_BrowserFavorites    = SELECT_KEY( KEY_FAVORITES,                          VK_BROWSER_FAVORITES ),
-    K_BrowserHome         = SELECT_KEY( KEY_HOMEPAGE,                          VK_BROWSER_HOME ),
+    K_BrowserRefresh      = SELECT_KEY( KEY_REFRESH,                VK_BROWSER_REFRESH ),
+    K_BrowserFavorites    = SELECT_KEY( KEY_FAVORITES,              VK_BROWSER_FAVORITES ),
+    K_BrowserHome         = SELECT_KEY( KEY_HOMEPAGE,               VK_BROWSER_HOME ),
     K_Browser             = SELECT_KEY( KEY_WWW,                     0 ),
     // K_Search              = SELECT_KEY( KEY_SEARCH,                 0),
 

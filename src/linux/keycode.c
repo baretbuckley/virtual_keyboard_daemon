@@ -96,8 +96,6 @@ const char* keycodeAsString(enum KeyCode code) {
 
         // Mouse keys
         case K_Scroll: return "Scroll";
-        case K_ScrollUp: return "ScrollUp";
-        case K_ScrollDown: return "ScrollDown";
         case K_LeftMouse: return "LeftMouse";
         case K_RightMouse: return "RightMouse";
 
